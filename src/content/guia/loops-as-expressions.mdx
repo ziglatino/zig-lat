@@ -1,0 +1,39 @@
+---
+title: 'Loops como expresiones'
+description: '
+Al igual que return, break acepta un valor. Esto se puede usar para producir un valor desde un bucle. Los bucles en Zig también tienen una rama else, que se evalúa cuando el bucle no se sale con un break.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Loops como expresiones</h1>
+
+
+Al igual que <span class="bg-gray-800 rounded-md px-2 text-purple-400">return</span>, <span class="bg-gray-800 rounded-md px-2 text-purple-400">break</span> acepta un valor. Esto se puede usar para producir un valor desde un bucle. Los bucles en Zig también tienen una rama <span class="bg-gray-800 rounded-md px-2 text-purple-400">else</span>, que se evalúa cuando el bucle no se sale con un <span class="bg-gray-800 rounded-md px-2 text-purple-400">break</span>.
+
+<Prism lang="zig" code={`fn rangeHasNumber(begin: usize, end: usize, number: usize) bool {
+    var i = begin;
+    return while (i < end) : (i += 1) {
+        if (i == number) {
+            break true;
+        }
+    } else false;
+}
+
+test "while loop expression" {
+    try expect(rangeHasNumber(0, 10, 3));
+}`}/>
+
+<EditThisPage url={sideMenuUrls[21].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[20].label} subText="Anterior" isRight={false} url={sideMenuUrls[20].url}/>
+    <NextButton text={sideMenuUrls[22].label} subText="Siguiente" isRight={true} url={sideMenuUrls[22].url}/>
+</div>
+</div>
