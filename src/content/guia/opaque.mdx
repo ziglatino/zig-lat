@@ -1,0 +1,61 @@
+---
+title: 'Opaque'
+description: 'Los bucles en línea son desenrollados, y permiten que ocurran algunas cosas que sólo funcionan en tiempo de compilación. Aquí usamos un for, pero un while funciona de forma similar.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Opaque</h1>
+
+Los tipos <span class="bg-gray-800 rounded-md px-2 text-green-400">opaque</span> en Zig tienen un tamaño y alineación desconocidos (aunque no nulos). Debido a esto, estos tipos de datos no pueden ser almacenados directamente. Se utilizan para mantener la seguridad de tipo con punteros a tipos sobre los que no tenemos información.
+
+<Prism lang="zig" code={`const Window = opaque {};
+const Button = opaque {};
+
+extern fn show_window(*Window) callconv(.C) void;
+
+test "opaque" {
+    var main_window: *Window = undefined;
+    show_window(main_window);
+
+    var ok_button: *Button = undefined;
+    show_window(ok_button);
+}`}/>
+
+<Prism lang="zig" code={`./test-c1.zig:653:17: error: expected type '*Window', found '*Button'
+    show_window(ok_button);
+                ^
+./test-c1.zig:653:17: note: pointer type child 'Button' cannot cast into pointer type child 'Window'
+    show_window(ok_button);
+                ^`}/>
+
+Los tipos <span class="bg-gray-800 rounded-md px-2 text-green-400">opaque</span> pueden tener declaraciones en sus definiciones (igual que las estructuras, enumeraciones y uniones).
+
+<Prism lang="zig" code={`const Window = opaque {
+    fn show(self: *Window) void {
+        show_window(self);
+    }
+};
+
+extern fn show_window(*Window) callconv(.C) void;
+
+test "opaque with declarations" {
+    var main_window: *Window = undefined;
+    main_window.show();
+}`}/>
+
+El caso de uso típico de los tipos <span class="bg-gray-800 rounded-md px-2 text-green-400">opaque</span> es mantener la seguridad de tipo al interoperar con código C que no expone información completa sobre el tipo.
+
+<EditThisPage url={sideMenuUrls[26].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[25].label} subText="Anterior" isRight={false} url={sideMenuUrls[25].url}/>
+    <NextButton text={sideMenuUrls[27].label} subText="Siguiente" isRight={true} url={sideMenuUrls[27].url}/>
+</div>
+</div>
