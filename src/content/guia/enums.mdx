@@ -1,0 +1,85 @@
+---
+title: 'Enums'
+description: 'Los Enums pueden pensarse como un par de [*]T (el puntero a los datos) y un usize (el conteo de elementos). Su sintaxis es []T, donde T es el tipo hijo. Los Enums se utilizan ampliamente en Zig cuando necesitas operar sobre cantidades arbitrarias de datos. Los Enums tienen los mismos atributos que los punteros, lo que significa que también existen Enums constantes. Los bucles for también operan sobre Enums. Las literales de cadena en Zig se convierten en []const u8.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Enums</h1>
+
+Las enums de Zig te permiten definir tipos con un conjunto restringido de valores nombrados.
+
+Vamos a declarar una enum.
+
+<Prism lang="zig" code={`const Direction = enum { north, south, east, west };`}/>
+
+Los tipos de enums pueden tener tipos de etiqueta especificados (enteros).
+
+<Prism lang="zig" code={`const Value = enum(u2) { zero, one, two };`}/>
+
+Los valores ordinales de las enums comienzan en 0. Se pueden acceder con la función integrada <span class="bg-gray-800 rounded-md px-2 text-green-400">@intFromEnum</span>.
+
+<Prism lang="zig" code={`test "valor ordinal de la enum" {
+    try expect(@intFromEnum(Value.zero) == 0);
+    try expect(@intFromEnum(Value.one) == 1);
+    try expect(@intFromEnum(Value.two) == 2);
+}`}/>
+
+Los valores pueden ser anulados, con los siguientes valores continuando desde allí.
+
+<Prism lang="zig" code={`const Value2 = enum(u32) {
+    hundred = 100,
+    thousand = 1000,
+    million = 1000000,
+    next,
+};
+
+test "establecer valor ordinal de la enum" {
+    try expect(@intFromEnum(Value2.hundred) == 100);
+    try expect(@intFromEnum(Value2.thousand) == 1000);
+    try expect(@intFromEnum(Value2.million) == 1000000);
+    try expect(@intFromEnum(Value2.next) == 1000001);
+}`}/>
+
+Las enums pueden tener métodos. Estos actúan como funciones con nombres de espacio que pueden ser llamadas con la sintaxis de punto.
+
+<Prism lang="zig" code={`const Suit = enum {
+    clubs,
+    spades,
+    diamonds,
+    hearts,
+    pub fn isClubs(self: Suit) bool {
+        return self == Suit.clubs;
+    }
+};
+
+test "método de la enum" {
+    try expect(Suit.spades.isClubs() == Suit.isClubs(.spades));
+}`}/>
+
+Las enums también pueden tener declaraciones <span class="bg-gray-800 rounded-md px-2 text-purple-400">var</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">const</span>. Estas actúan como variables globales con nombres de espacio y sus valores no están relacionados ni adjuntos a instancias del tipo enum.
+
+<Prism lang="zig" code={`const Mode = enum {
+    var count: u32 = 0;
+    on,
+    off,
+};
+
+test "hmm" {
+    Mode.count += 1;
+    try expect(Mode.count == 1);
+}`}/>
+
+<EditThisPage  url={sideMenuUrls[14].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[13].label} subText="Anterior" isRight={false} url={sideMenuUrls[13].url}/>
+    <NextButton text={sideMenuUrls[15].label} subText="Siguiente" isRight={true} url={sideMenuUrls[15].url}/>
+</div>
+</div>
