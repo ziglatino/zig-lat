@@ -1,0 +1,73 @@
+---
+title: 'Reglas de enteros'
+description: 'Zig admite literales enteros hexadecimales, octales y binarios.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Reglas de enteros</h1>
+
+Zig admite literales enteros hexadecimales, octales y binarios.
+
+<Prism lang="zig" code={`const decimal_int: i32 = 98222;
+const hex_int: u8 = 0xff;
+const another_hex_int: u8 = 0xFF;
+const octal_int: u16 = 0o755;
+const binary_int: u8 = 0b11110000;
+`}/>
+
+También se pueden colocar guiones bajos entre dígitos como separador visual.
+
+<Prism lang="zig" code={`const one_billion: u64 = 1_000_000_000;
+const binary_mask: u64 = 0b1_1111_1111;
+const permissions: u64 = 0o7_5_5;
+const big_address: u64 = 0xFF80_0000_0000_0000;
+`}/>
+
+"La ampliación de enteros" está permitida, lo que significa que los enteros de un tipo pueden convertirse en un entero de otro tipo, siempre que el nuevo tipo pueda contener todos los valores que puede contener el tipo antiguo.
+
+<Prism lang="zig" code={`test "ampliación de enteros" {
+    const a: u8 = 250;
+    const b: u16 = a;
+    const c: u32 = b;
+    try expect(c == a);
+}`}/>
+
+Si tienes un valor almacenado en un entero que no se puede convertir al tipo que deseas, se puede usar <span class="bg-gray-800 rounded-md px-2 text-green-400">@intCast</span> para convertir explícitamente de un tipo a otro. Si el valor dado está fuera del rango del tipo de destino, esto es un comportamiento ilegal detectable.
+
+<Prism lang="zig" code={`test "@intCast" {
+    const x: u64 = 200;
+    const y = @as(u8, @intCast(x));
+    try expect(@TypeOf(y) == u8);
+}`}/>
+
+Por defecto, los enteros no pueden desbordarse. Los desbordamientos son comportamientos ilegales detectables. A veces, poder desbordar enteros de una manera bien definida es un comportamiento deseado. Para este caso de uso, Zig proporciona operadores de desbordamiento.
+
+| Operador normal | Operador de envoltura |
+| --------------- | ----------------- |
+| +               | +%                |
+| -               | -%                |
+| \*              | \*%               |
+| +=              | +%=               |
+| -=              | -%=               |
+| \*=             | \*%=              |
+
+<Prism lang="zig" code={`test "Desbordamiento bien definido" {
+    var a: u8 = 255;
+    a +%= 1;
+    try expect(a == 0);
+}`}/>
+
+<EditThisPage url={sideMenuUrls[17].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[16].label} subText="Anterior" isRight={false} url={sideMenuUrls[16].url}/>
+    <NextButton text={sideMenuUrls[18].label} subText="Siguiente" isRight={true} url={sideMenuUrls[18].url}/>
+</div>
+</div>
