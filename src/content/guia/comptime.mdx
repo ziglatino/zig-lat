@@ -1,0 +1,165 @@
+---
+title: 'Comptime'
+description: 'Los bloques de código pueden ser ejecutados de manera forzada en tiempo de compilación usando la palabra clave comptime. En este ejemplo, las variables x e y son equivalentes.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Comptime</h1>
+
+Los bloques de código pueden ser ejecutados de manera forzada en tiempo de compilación usando la palabra clave <span class="bg-gray-800 rounded-md px-2 text-green-400">comptime</span>. En este ejemplo, las variables x e y son equivalentes.
+
+<Prism lang="zig" code={`fn fibonacci(n: u16) u16 {
+    if (n == 0 or n == 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+test "Bloques comptime" {
+    const x = comptime fibonacci(10);
+    const y = comptime blk: {
+        break :blk fibonacci(10);
+    };
+    try expect(y == 55);
+    try expect(x == 55);
+}`}/>
+
+
+Los literales enteros son del tipo <span class="bg-gray-800 rounded-md px-2 text-purple-400">comptime_int</span>. Estos son especiales en el sentido de que no tienen tamaño (__¡no se pueden usar en tiempo de ejecución!__) y tienen precisión arbitraria. Los valores <span class="bg-gray-800 rounded-md px-2 text-purple-400">comptime_int</span> se convierten a cualquier tipo de entero que pueda contenerlos. También se convierten a floats. Los literales de caracteres son de este tipo.
+
+<Prism lang="zig" code={`test "comptime_int" {
+    const a = 12;
+    const b = a + 10;
+
+    const c: u4 = a;
+    const d: f32 = b;
+
+    try expect(c == 12);
+    try expect(d == 22);
+}`}/>
+
+También está disponible <span class="bg-gray-800 rounded-md px-2 text-purple-400">comptime_float</span>, que internamente es un <span class="bg-gray-800 rounded-md px-2 text-purple-400">f128</span>. Estos no pueden ser convertidos a enteros, incluso si contienen un valor entero.
+
+Los tipos en Zig son valores del tipo <span class="bg-gray-800 rounded-md px-2 text-purple-400">type</span>. Estos están disponibles en tiempo de compilación. Anteriormente los hemos encontrado mediante <span class="bg-gray-800 rounded-md px-2 text-green-400">@TypeOf</span> y comparándolos con otros tipos, pero podemos hacer más.
+
+<Prism lang="zig" code={`test "ramificación en tipos" {
+    const a = 5;
+    const b: if (a < 10) f32 else i32 = 5;
+    try expect(b == 5);
+    try expect(@TypeOf(b) == f32);
+}`}/>
+
+Los parámetros de función en Zig pueden ser etiquetados como <span class="bg-gray-800 rounded-md px-2 text-green-400">comptime</span>. Esto significa que el valor pasado a ese parámetro de función debe ser conocido en tiempo de compilación. Hagamos una función que devuelve un tipo. Observa cómo esta función está en <span class="bg-gray-800 rounded-md px-2 text-purple-400">PascalCase</span>, ya que devuelve un tipo.
+
+<Prism lang="zig" code={`fn Matrix(
+    comptime T: type,
+    comptime width: comptime_int,
+    comptime height: comptime_int,
+) type {
+    return [height][width]T;
+}
+
+test "returning a type" {
+    try expect(Matrix(f32, 4, 4) == [4][4]f32);
+}`}/>
+
+Podemos reflexionar sobre los tipos usando el built-in <span class="bg-gray-800 rounded-md px-2 text-green-400">@typeInfo</span>, que toma un tipo y devuelve una unión etiquetada. Este tipo de unión etiquetada se puede encontrar en <span class="bg-gray-800 rounded-md px-2 text-green-400">std.builtin.TypeInfo</span> (información sobre cómo utilizar importaciones y std más tarde).
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+fn addSmallInts(comptime T: type, a: T, b: T) T {
+    return switch (@typeInfo(T)) {
+        .ComptimeInt => a + b,
+        .Int => |info| if (info.bits <= 16)
+            a + b
+        else
+            @compileError("ints too large"),
+        else => @compileError("only ints accepted"),
+    };
+}
+
+test "typeinfo switch" {
+    const x = addSmallInts(u16, 20, 30);
+    try expect(@TypeOf(x) == u16);
+    try expect(x == 50);
+}`}/>
+
+Podemos usar la función <span class="bg-gray-800 rounded-md px-2 text-green-400">@Type</span> para crear un tipo a partir de un <span class="bg-gray-800 rounded-md px-2 text-green-400">@typeInfo</span>. <span class="bg-gray-800 rounded-md px-2 text-green-400">@Type</span> está implementado para la mayoría de los tipos, pero notablemente no está implementado para enums, unions, funciones y structs.
+
+Aquí se usa la sintaxis de estructura anónima con <span class="bg-gray-800 rounded-md px-2 text-purple-400">.\{}</span>, porque la <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span> en <span class="bg-gray-800 rounded-md px-2 text-purple-400">T\{}</span> puede ser inferida. Las estructuras anónimas se tratarán en detalle más adelante. En este ejemplo, obtendremos un error de compilación si la etiqueta Int no está configurada.
+
+<Prism lang="zig" code={`fn GetBiggerInt(comptime T: type) type {
+    return @Type(.{
+        .Int = .{
+            .bits = @typeInfo(T).Int.bits + 1,
+            .signedness = @typeInfo(T).Int.signedness,
+        },
+    });
+}
+
+test "@Type" {
+    try expect(GetBiggerInt(u8) == u9);
+    try expect(GetBiggerInt(i31) == i32);
+}`}/>
+
+Devolver un tipo de estructura es cómo se crean estructuras de datos genéricas en Zig. El uso de <span class="bg-gray-800 rounded-md px-2 text-green-400">@This</span> es necesario aquí, lo que obtiene el tipo de la estructura, unión o enum más interna. Aquí también se usa <span class="bg-gray-800 rounded-md px-2 text-purple-400">std.mem.eql</span>, que compara dos slices.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+fn Vec(
+    comptime count: comptime_int,
+    comptime T: type,
+) type {
+    return struct {
+        data: [count]T,
+        const Self = @This();
+
+        fn abs(self: Self) Self {
+            var tmp = Self{ .data = undefined };
+            for (self.data, 0..) |elem, i| {
+                tmp.data[i] = if (elem < 0)
+                    -elem
+                else
+                    elem;
+            }
+            return tmp;
+        }
+
+        fn init(data: [count]T) Self {
+            return Self{ .data = data };
+        }
+    };
+}
+
+const eql = @import("std").mem.eql;
+
+test "vector generico" {
+    const x = Vec(3, f32).init([_]f32{ 10, -10, 5 });
+    const y = x.abs();
+    try expect(eql(f32, &y.data, &[_]f32{ 10, 10, 5 }));
+}`}/>
+
+Los tipos de los parámetros de función también pueden ser inferidos usando <span class="bg-gray-800 rounded-md px-2 text-purple-400">anytype</span> en lugar de un tipo. Luego se puede usar <span class="bg-gray-800 rounded-md px-2 text-green-400">@TypeOf</span> en el parámetro.
+
+<Prism lang="zig" code={`fn plusOne(x: anytype) @TypeOf(x) {
+    return x + 1;
+}
+
+test "parámetro de función inferido" {
+    try expect(plusOne(@as(u32, 1)) == 2);
+}`}/>
+
+Comptime también introduce los operadores <span class="bg-gray-800 rounded-md px-2 text-purple-400">++</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">**</span> para concatenar y repetir arrays y slices. Estos operadores no funcionan en tiempo de ejecución.
+
+<EditThisPage url={sideMenuUrls[23].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[22].label} subText="Anterior" isRight={false} url={sideMenuUrls[22].url}/>
+    <NextButton text={sideMenuUrls[24].label} subText="Siguiente" isRight={true} url={sideMenuUrls[24].url}/>
+</div>
+</div>
