@@ -1,0 +1,172 @@
+---
+title: "Stack de Memoria"
+description: "Stack de Memoria"
+pubDate: "Jul 02 2022"
+heroImage: "/blog-placeholder-5.jpg"
+---
+
+import { Prism } from "@astrojs/prism";
+
+Adentrarse en los punteros proporcionó una visión sobre la relación entre variables, datos y memoria. Así que estamos empezando a tener una idea de cómo se ve la memoria, pero aún no hemos hablado sobre cómo se gestiona los datos y, por extensión, la memoria. Para scripts cortos y simples, esto probablemente no importa. En la era de las laptops de 32 GB de RAM, puedes iniciar tu programa, usar unos pocos cientos de megabytes de memoria RAM para leer un archivo y analizar una respuesta HTTP, hacer algo increíble y salir. Al salir del programa, el sistema operativo sabe que la memoria que le dio a tu programa ahora puede ser utilizada para otra cosa.
+
+Pero para programas que se ejecutan durante días, meses o incluso años, la memoria se convierte en un recurso limitado y valioso, probablemente buscado por otros procesos que se ejecutan en la misma máquina. Simplemente no hay forma de esperar hasta que el programa salga para liberar memoria. Este es el trabajo principal de un recolector de basura: saber qué datos ya no se están utilizando y liberar su memoria. En Zig, tú eres el recolector de basura.
+
+La mayoría de los programas que escribas harán uso de tres "áreas" de memoria. La primera es el espacio global, donde se almacenan las constantes del programa, incluidas las literales de cadena. Todos los datos globales están integrados en el binario, completamente conocidos en tiempo de compilación (y por lo tanto en tiempo de ejecución) e inmutables. Estos datos existen a lo largo de la vida del programa, sin necesitar más o menos memoria. Aparte del impacto que tiene en el tamaño de nuestro binario, esto no es algo de lo que necesitemos preocuparnos en absoluto.
+
+La segunda área de memoria es la pila de llamadas, el tema de esta parte. La tercera área es el montón (heap), el tema para nuestra próxima parte.
+
+<hr />
+<br />
+No hay una diferencia física real entre las áreas de memoria; es un concepto
+creado por el sistema operativo y el ejecutable.
+<hr />
+
+<br/>
+<hr/>
+<a id="stack-frames" class="no-underline text-black hover:underline hover:text-black" href="/aprende/stack-de-memoria/#stack-frames"><h2 class="text-4xl">Marcos de pila / Stack Frames</h2></a>
+Todos los datos que hemos visto hasta ahora han sido constantes almacenadas en la sección de datos globales de nuestro binario o variables locales. "Local" indica que la variable solo es válida dentro del ámbito donde se declara. En Zig, los ámbitos comienzan y terminan con llaves, `{ ... }`. La mayoría de las variables tienen un ámbito dentro de una función, incluidos los parámetros de función, o dentro de un bloque de control de flujo, como un `if`. Pero, como hemos visto, puedes crear bloques arbitrarios y, por lo tanto, ámbitos arbitrarios.
+
+En la parte anterior, visualizamos la memoria de nuestras funciones `main` y `levelUp`, cada una con un `User`:
+
+<Prism
+  lang="zig"
+  code={`main: user ->    -------------  (id: 1043368d0)
+                 |     1     |
+                 -------------  (power: 1043368d8)
+                 |    100    |
+                 -------------  (name.len: 1043368dc)
+                 |     4     |
+                 -------------  (name.ptr: 1043368e4)
+                 | 1182145c0 |-------------------------
+levelUp: user -> -------------  (id: 1043368ec)       |
+                 |     1     |                        |
+                 -------------  (power: 1043368f4)    |
+                 |    100    |                        |
+                 -------------  (name.len: 1043368f8) |
+                 |     4     |                        |
+                 -------------  (name.ptr: 104336900) |
+                 | 1182145c0 |-------------------------
+                 -------------                        |
+                                                      |
+                 .............  empty space           |
+                 .............  or other data         |
+                                                      |
+                 -------------  (1182145c0)        <---
+                 |    'G'    |
+                 -------------
+                 |    'o'    |
+                 -------------
+                 |    'k'    |
+                 -------------
+                 |    'u'    |
+                 -------------`}
+/>
+
+<br />
+Hay una razón por la cual `levelUp` está inmediatamente después de `main`: este es
+nuestro [simplificado] stack de llamadas. Cuando nuestro programa comienza, `main`,
+junto con sus variables locales, se empujan al stack de llamadas. Cuando se llama
+a `levelUp`, sus parámetros y cualquier variable local se empujan al stack de llamadas.
+Es importante destacar que cuando `levelUp` retorna, se saca del stack. Después de
+que `levelUp` retorna y el control vuelve a `main`, nuestro stack de llamadas se
+ve así:
+<Prism
+  lang="zig"
+  code={`main: user ->    -------------  (id: 1043368d0)
+                 |     1     |
+                 -------------  (power: 1043368d8)
+                 |    100    |
+                 -------------  (name.len: 1043368dc)
+                 |     4     |
+                 -------------  (name.ptr: 1043368e4)
+                 | 1182145c0 |-------------------------
+                 -------------
+                                                      |
+                 .............  empty space           |
+                 .............  or other data         |
+                                                      |
+                 -------------  (1182145c0)        <---
+                 |    'G'    |
+                 -------------
+                 |    'o'    |
+                 -------------
+                 |    'k'    |
+                 -------------
+                 |    'u'    |
+                 -------------`}
+/>
+<br />
+Cuando se llama a una función, todo su marco de pila se empuja al stack de llamadas. Esta es una de las razones por las que necesitamos conocer el tamaño de cada tipo. Aunque es posible que no sepamos la longitud del nombre de nuestro usuario hasta que se ejecute esa línea de código específica (asumiendo que no era una cadena literal constante), sí sabemos que nuestra función tiene un `User` y, además de los otros campos, necesitaremos 8 bytes para `name.len` y 8 bytes para `name.ptr`.
+
+Cuando la función retorna, su marco de pila, que fue el último empujado al stack de llamadas, es eliminado. ¡Algo sorprendente acaba de suceder: la memoria utilizada por `levelUp` se ha liberado automáticamente! Aunque técnicamente esa memoria podría devolverse al sistema operativo, hasta donde yo sé, ninguna implementación realmente reduce el stack de llamadas (sin embargo, lo harán crecer dinámicamente cuando sea necesario). Aun así, la memoria utilizada para almacenar el marco de pila de `levelUp` ahora está libre para ser utilizada dentro de nuestro proceso para otro marco de pila.
+
+<hr/>
+<br/>
+En un programa normal, el stack de llamadas puede crecer bastante grande. Entre todo el código de infraestructura y las bibliotecas que utiliza un programa típico, terminas con funciones profundamente anidadas. Normalmente, eso no es un problema, pero de vez en cuando, es posible que te hayas encontrado con algún tipo de error de desbordamiento de pila (stack overflow). Esto ocurre cuando nuestro stack de llamadas se ha quedado sin espacio. Más a menudo que no, esto sucede con funciones recursivas, es decir, una función que se llama a sí misma.
+
+<hr/>
+
+<br/>
+Al igual que nuestros datos globales, el stack de llamadas es administrado por el sistema operativo y el ejecutable. Al iniciar el programa y para cada hilo que iniciemos después, se crea un stack de llamadas (cuyo tamaño normalmente se puede configurar en el sistema operativo). El stack de llamadas existe durante toda la vida del programa o, en el caso de un hilo, durante toda la vida del hilo. Al salir del programa o del hilo, el stack de llamadas se libera. Pero mientras que nuestros datos globales tienen todos los datos globales del programa, el stack de llamadas solo tiene los marcos de pila para la jerarquía de funciones actualmente en ejecución. Esto es eficiente tanto en términos de uso de memoria como en la simplicidad de empujar y sacar marcos de pila del stack.
+<hr/>
+<a id="dangling-pointers" class="no-underline text-black hover:underline hover:text-black" href="/aprende/stack-de-memoria/#dangling-pointers"><h2 class="text-4xl">Punteros colgantes / Dangling Pointers</h2></a>
+El stack de llamadas es asombroso tanto por su simplicidad como por su eficiencia. Pero también es aterrador: cuando una función retorna, cualquiera de sus datos locales se vuelve inaccesible. Eso puede sonar razonable, después de todo son datos locales, pero puede introducir problemas graves. Considera este código:
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() void {
+	const user1 = User.init(1, 10);
+	const user2 = User.init(2, 20);
+
+	std.debug.print("User {d} has power of {d}", .{user1.id, user1.power});
+	std.debug.print("User {d} has power of {d}", .{user2.id, user2.power});
+}
+
+pub const User = struct {
+	id: u64,
+	power: i32,
+
+	fn init(id: u64, power: i32) *User{
+		var user = User{
+			.id = id,
+			.power = power,
+		};
+		return &user;
+	}
+};`}/>
+<br/>
+
+A simple vista, sería razonable esperar la siguiente salida:
+
+<Prism lang="zig" code={`User 1 has power of 10
+User 2 has power of 20`} />
+<br/>
+
+Obtuve:
+
+<Prism lang="zig" code={`User 2 has power of 20
+User 9114745905793990681 has power of 0`} />
+
+<br/>
+Podrías obtener resultados diferentes, pero según mi salida, `user1` ha heredado los valores de `user2` y los valores de `user2` son ilógicos. El problema clave con este código es que `User.init` devuelve la dirección del usuario local, `&user`. Esto se llama un puntero colgante, un puntero que hace referencia a una memoria no válida. Es la fuente de muchos segfaults.
+
+Cuando se saca un marco de pila del stack de llamadas, cualquier referencia que tengamos a esa memoria es inválida. El resultado de intentar acceder a esa memoria es indefinido. Es probable que obtengas datos sin sentido o un segfault. Podríamos intentar encontrar algún sentido en mi salida, pero no es un comportamiento en el que quisiéramos, o incluso podríamos, confiar.
+
+Uno de los desafíos con este tipo de error es que, en lenguajes con recolectores de basura, el código anterior está perfectamente bien. Por ejemplo, en Go se detectaría que el `user` local sobrevive a su ámbito, la función `init`, y se aseguraría de su validez mientras sea necesario (cómo lo hace Go es un detalle de implementación, pero tiene algunas opciones, incluyendo mover los datos al montón, que es de lo que trata la siguiente parte).
+
+Otro problema, lamento decirlo, es que puede ser un error difícil de detectar. En nuestro ejemplo anterior, claramente estamos devolviendo la dirección de una variable local. Pero tal comportamiento puede ocultarse dentro de funciones anidadas y tipos de datos complejos. ¿Ves algún posible problema con el siguiente código incompleto:
+
+<Prism lang="zig" code={`fn read() !void {
+	const input = try readUserInput();
+	return Parser.parse(input);
+}`}/>
+<br/>
+
+Lo que sea que Parser.parse devuelva sobrevive a input. Si Parser mantiene una referencia a input, eso sería un puntero colgante esperando para hacer que nuestra aplicación se bloquee. Idealmente, si Parser necesita que input viva tanto tiempo como lo hace, hará una copia de él y esa copia estará ligada a su propio ciclo de vida (más sobre esto en la próxima parte). Pero no hay nada aquí para hacer cumplir este contrato. La documentación de Parser podría arrojar algo de luz sobre lo que espera de input o qué hace con él. En ausencia de eso, podríamos necesitar investigar el código para entenderlo.
+
+<hr/>
+<br/>
+
+La forma simple de solucionar nuestro error inicial es cambiar `init` para que devuelva un `User` en lugar de un` *User` (un puntero a un `User`). Entonces podríamos devolver `user;` en lugar de devolver `&user;`. Pero eso no siempre será posible. A menudo, los datos tienen que existir más allá de los límites rígidos de los ámbitos de las funciones. Para eso tenemos la tercera área de memoria, el montón (heap), el tema de la próxima parte.
+
+Antes de adentrarnos en el montón, debes saber que veremos un ejemplo final de punteros colgantes antes del final de esta guía. En ese momento, habremos cubierto suficiente del lenguaje para dar un ejemplo un poco menos complicado. Quiero volver a este tema porque, para los desarrolladores que vienen de lenguajes con recolección de basura, esto probablemente causará errores y frustración. Es algo que dominarás. Se trata de ser consciente de dónde y cuándo existen los datos.
