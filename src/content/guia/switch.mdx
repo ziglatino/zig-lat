@@ -1,0 +1,56 @@
+---
+title: 'Switch'
+description: 'El switch de Zig funciona tanto como una declaración como una expresión. Los tipos de todas las ramas deben coercer al tipo sobre el cual se está realizando el switch. Todos los valores posibles deben tener una rama asociada; no se pueden dejar valores fuera. Los casos no pueden caer en otras ramas.'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Switch</h1>
+
+El switch de Zig funciona tanto como una declaración como una expresión. Los tipos de todas las ramas deben coercer al tipo sobre el cual se está realizando el switch. Todos los valores posibles deben tener una rama asociada; no se pueden dejar valores fuera. Los casos no pueden caer en otras ramas.
+
+Un ejemplo de una declaración switch. El else es necesario para satisfacer la exhaustividad de este switch.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "switch statement" {
+    var x: i8 = 10;
+    switch (x) {
+        -1...1 => {
+            x = -x;
+        },
+        10, 100 => {
+            //consideraciones especiales deben ser tomadas
+            //al dividir enteros con signo
+            x = @divExact(x, 10);
+        },
+        else => {},
+    }
+    try expect(x == 1);
+}`}/>
+
+Aquí está lo anterior, pero como una expresión switch.
+
+<Prism lang="zig" code={`test "switch expression" {
+    var x: i8 = 10;
+    x = switch (x) {
+        -1...1 => -x,
+        10, 100 => @divExact(x, 10),
+        else => x,
+    };
+    try expect(x == 1);
+}`}/>
+
+<EditThisPage  url={sideMenuUrls[8].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[7].label} subText="Anterior" isRight={false} url={sideMenuUrls[7].url}/>
+    <NextButton text={sideMenuUrls[9].label} subText="Siguiente" isRight={true} url={sideMenuUrls[9].url}/>
+</div>
+</div>
