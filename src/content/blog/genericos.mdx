@@ -1,0 +1,202 @@
+---
+title: "Genericos"
+description: "Genericos"
+pubDate: "Jul 02 2022"
+heroImage: "/blog-placeholder-5.jpg"
+---
+import { Prism } from "@astrojs/prism";
+
+En la parte anterior construimos una estructura de datos básica llamada `IntList`. El objetivo de esta estructura de datos era almacenar un número dinámico de valores. Aunque el algoritmo que usamos funcionaría para cualquier tipo de datos, nuestra implementación estaba ligada a valores de tipo `i64`. Ahora entran en juego los genéricos, cuyo objetivo es abstraer algoritmos y estructuras de datos de tipos específicos.
+
+Muchos lenguajes implementan genéricos con una sintaxis especial y reglas específicas para genéricos. Con Zig, los genéricos son menos una característica específica y más una expresión de lo que el lenguaje es capaz de hacer. Específicamente, los genéricos aprovechan la potente metaprogramación en tiempo de compilación de Zig.
+
+Comenzaremos mirando un ejemplo tonto, solo para orientarnos:
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() !void {
+	var arr: IntArray(3) = undefined;
+	arr[0] = 1;
+	arr[1] = 10;
+	arr[2] = 100;
+	std.debug.print("{any}\n", .{arr});
+}
+
+fn IntArray(comptime length: usize) type {
+	return [length]i64;
+}`} />
+<br/>
+Lo anterior imprime `{ 1, 10, 100 }`. La parte interesante es que tenemos una función que devuelve un `type` (de ahí que la función esté en PascalCase). Y no solo cualquier tipo, sino un tipo basado en un parámetro de función. Este código solo funcionó porque declaramos `length` como `comptime`. Es decir, requerimos que cualquiera que llame a `IntArray` pase un parámetro de longitud conocido en tiempo de compilación. Esto es necesario porque nuestra función devuelve un `type` y los `types` siempre deben ser conocidos en tiempo de compilación.
+
+Una función puede devolver cualquier tipo, no solo primitivos y matrices. Por ejemplo, con un pequeño cambio, podemos hacer que devuelva una estructura:
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() !void {
+	var arr: IntArray(3) = undefined;
+	arr.items[0] = 1;
+	arr.items[1] = 10;
+	arr.items[2] = 100;
+	std.debug.print("{any}\n", .{arr.items});
+}
+
+fn IntArray(comptime length: usize) type {
+	return struct {
+		items: [length]i64,
+	};
+}`}/>
+<br/>
+Puede parecer extraño, pero el tipo de `arr's` realmente es `IntArray(3)`. Es un tipo como cualquier otro tipo y `arr` es un valor como cualquier otro valor. Si llamáramos a `IntArray(7)`, ese sería un tipo diferente. Tal vez podamos hacer las cosas más ordenadas:
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() !void {
+	var arr = IntArray(3).init();
+	arr.items[0] = 1;
+	arr.items[1] = 10;
+	arr.items[2] = 100;
+	std.debug.print("{any}\n", .{arr.items});
+}
+
+fn IntArray(comptime length: usize) type {
+	return struct {
+		items: [length]i64,
+
+		fn init() IntArray(length) {
+			return .{
+				.items = undefined,
+			};
+		}
+	};
+}`} />
+
+A simple vista, eso podría no parecer más ordenado. Pero además de ser anónimo y estar anidado en una función, nuestra estructura se parece a todas las demás estructuras que hemos visto hasta ahora. Tiene campos, tiene funciones. Ya sabes lo que dicen, si parece un pato... Bueno, esto parece, nada y grazna como una estructura normal, porque lo es.
+
+Hemos tomado este camino para familiarizarnos con una función que devuelve un `type` y la sintaxis que la acompaña. Para obtener un genérico más típico, necesitamos hacer un último cambio: nuestra función debe tomar un `type`. En realidad, este es un cambio pequeño, pero `type` puede sentirse más abstracto que `usize`, así que lo hicimos lentamente. Vamos a dar un salto y modificar nuestro `IntList` anterior para que funcione con cualquier tipo. Comenzaremos con un esqueleto:
+
+<Prism lang="zig" code={`fn List(comptime T: type) type {
+	return struct {
+		pos: usize,
+		items: []T,
+		allocator: Allocator,
+
+		fn init(allocator: Allocator) !List(T) {
+			return .{
+				.pos = 0,
+				.allocator = allocator,
+				.items = try allocator.alloc(T, 4),
+			};
+		}
+	};
+}`}/>
+
+<br/>
+
+La `struct` anterior es casi idéntica a nuestra `IntList`, excepto que `i64` ha sido reemplazado por `T`. Ese `T` puede parecer especial, pero es solo un nombre de variable. Podríamos haberlo llamado `item_type`. Sin embargo, siguiendo la convención de nombres de Zig, las variables de tipo `type` son PascalCase.
+<hr/>
+<br/>
+Para bien o para mal, usar una sola letra para representar un parámetro de tipo es mucho más antiguo que Zig. T es un valor predeterminado común en la mayoría de los lenguajes, pero verás variaciones específicas del contexto, como los mapas hash que usan K y V para sus tipos de parámetros de clave y valor.
+<hr/>
+<br/>
+Si no estás seguro acerca de nuestro esqueleto, considera los dos lugares donde usamos `T`: `items: []T` y `allocator.alloc(T, 4)`. Cuando queramos usar este tipo genérico, crearemos una instancia usando:
+
+<Prism lang="zig" code={`var list = try List(u32).init(allocator);`}/>
+<br/>
+
+Cuando el código se compila, el compilador crea un nuevo tipo reemplazando cada `T` por `u32`. Si volvemos a usar `List(u32)`, el compilador reutilizará el tipo que creó anteriormente. Si especificamos un nuevo valor para `T`, digamos `List(bool)` o `List(User)`, se crearán nuevos tipos.
+
+Para completar nuestra `List` genérica, podemos copiar y pegar literalmente el resto del código de `IntList` y reemplazar `i64` con `T`. Aquí tienes un ejemplo completo y funcional:
+
+<Prism lang="zig" code={`const std = @import("std");
+const Allocator = std.mem.Allocator;
+
+pub fn main() !void {
+	var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+	const allocator = gpa.allocator();
+
+	var list = try List(u32).init(allocator);
+	defer list.deinit();
+
+	for (0..10) |i| {
+		try list.add(@intCast(i));
+	}
+
+	std.debug.print("{any}\n", .{list.items[0..list.pos]});
+}
+
+fn List(comptime T: type) type {
+	return struct {
+		pos: usize,
+		items: []T,
+		allocator: Allocator,
+
+		fn init(allocator: Allocator) !List(T) {
+			return .{
+				.pos = 0,
+				.allocator = allocator,
+				.items = try allocator.alloc(T, 4),
+			};
+		}
+
+		fn deinit(self: List(T)) void {
+			self.allocator.free(self.items);
+		}
+
+		fn add(self: *List(T), value: T) !void {
+			const pos = self.pos;
+			const len = self.items.len;
+
+			if (pos == len) {
+
+                // nos hemos quedado sin espacio
+                // crear un nuevo slice que sea el doble de grande
+				var larger = try self.allocator.alloc(T, len * 2);
+
+                // copia los elementos que agregamos anteriormente a nuestro nuevo espacio
+				@memcpy(larger[0..len], self.items);
+
+				self.allocator.free(self.items);
+
+				self.items = larger;
+			}
+
+			self.items[pos] = value;
+			self.pos = pos + 1;
+		}
+	};
+}`}/>
+<br/>
+
+Nuestra función `init` devuelve un `List(T)`, y nuestras funciones `deinit` y `add` toman un `List(T)` y `*List(T)`. En nuestra clase simple, eso está bien, pero para estructuras de datos grandes, escribir el nombre genérico completo puede volverse un poco tedioso, especialmente si tenemos múltiples parámetros de tipo (por ejemplo, un mapa hash que toma un `type` separado para su clave y valor). La función integrada `@This()` devuelve el `type` más interno desde donde se llama. Lo más probable es que nuestro `List(T)` se escribiría como:
+
+<Prism lang="zig" code={`fn List(comptime T: type) type {
+	return struct {
+		pos: usize,
+		items: []T,
+		allocator: Allocator,
+
+		// Added
+		const Self = @This();
+
+		fn init(allocator: Allocator) !Self {
+			// ... same code
+		}
+
+		fn deinit(self: Self) void {
+			// .. same code
+		}
+
+		fn add(self: *Self, value: T) !void {
+			// .. same code
+		}
+	};
+}`}/>
+
+<br/>
+
+`Self` no es un nombre especial, es solo una variable, y está en PascalCase porque su valor es un `type`. Podemos usar `Self` donde anteriormente usábamos `List(T)`.
+
+<hr/>
+<br/>
+Podríamos crear ejemplos más complejos, con múltiples parámetros de tipo y algoritmos más avanzados. Pero, al final, el código genérico básico no sería diferente de los ejemplos simples anteriores. En la próxima parte volveremos a tratar los genéricos cuando veamos `ArrayList(T)` y `StringHashMap(V)` de la biblioteca estándar.
+
