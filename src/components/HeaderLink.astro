@@ -1,0 +1,18 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"a">;
+
+const { href, class: className, ...props } = Astro.props;
+
+const { pathname } = Astro.url;
+const subpath = pathname.match(/[^\/]+/g);
+const isActive = href === pathname || href === "/" + subpath?.[0];
+
+// Cambios en la clase list y activa para Tailwind CSS
+const anchorClasses = `inline-block text-base ${isActive ? "font-bold no-underline md:underline text-cyan-400 hover:text-cyan-400" : "text-gray-400 hover:text-white"}`;
+---
+
+<a href={href} class={anchorClasses} {...props}>
+  <slot />
+</a>

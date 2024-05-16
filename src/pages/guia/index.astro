@@ -1,0 +1,71 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import Sidebar from "../../components/Sidebar.svelte";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- <meta charset="UTF-8"> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <!-- <title>Document</title> -->
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <Header />
+    <div class="flex bg-[#1b1b1d]">
+      <Sidebar client:visible />
+      <main class="w-full  text-white">
+        <div class="container mx-auto w-[800px] gap-y-4">
+          <section class="text-justify mt-8">
+            <h2 class="text-white">Bienvenido</h2>
+            <p>
+              <a
+                href="https://ziglang.org/"
+                target="_blank"
+                class="bg-gray-800 rounded-md px-2 text-purple-400 hover:text-yellow-500"
+                >Zig</a
+              > es un lenguaje de programación de propósito general y una herramienta
+              para mantener software robusto, óptimo y reutilizable.
+            </p>
+          </section>
+          <section class="text-justify">
+            <div
+              class="rounded-lg bg-[#4d3800] flex flex-col gap-y-2 px-4 py-2 border-0 border-l-8 border-[#e6a700]"
+            >
+              <div class="flex place-items-center">
+                <img class="h-14" src="warn.svg" alt="" />
+                <h2 class="text-white text-2xl">Peligro</h2>
+              </div>
+              <p class="text-white">
+                La última versión de Zig es la 0.12.0 y actualmente es
+                inestable.
+              </p>
+            </div>
+          </section>
+
+          <section class="text-justify">
+            <p>Para seguir esta guía, asumimos que tienes:</p>
+            <ol class="list-disc pl-10">
+              <li>Experiencia previa en programación.</li>
+              <li>
+                Alguna comprensión de conceptos de programación a bajo nivel.
+              </li>
+            </ol>
+            <br />
+            <p>
+              Conocimiento de un lenguaje como C, C++, Rust, Go, Pascal o
+              similar, lo cual te ayudará a seguir esta guía. Debes tener
+              disponible un editor de texto, una terminal y conexión a internet.
+            </p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <Footer />
+  </body>
+</html>
