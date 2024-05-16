@@ -1,0 +1,46 @@
+---
+title: 'For loops'
+description: '
+Los bucles for se utilizan para iterar sobre arrays (y otros tipos, que se discutirán más adelante). Los bucles for siguen esta sintaxis. Al igual que while, los bucles for pueden usar break y continue. Aquí, hemos tenido que asignar valores a _, ya que Zig no nos permite tener valores no utilizados.'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+
+<h1 class="text-white py-8">For loops</h1>
+
+Los bucles <span class="bg-gray-800 rounded-md px-2 text-purple-400">for</span> se utilizan para iterar sobre arrays (y otros tipos, que se discutirán más adelante). Los bucles for siguen esta sintaxis. Al igual que while, los bucles for pueden usar <span class="bg-gray-800 rounded-md px-2 text-purple-400">break</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">continue</span>. Aquí, hemos tenido que asignar valores a <span class="bg-gray-800 rounded-md px-2 text-purple-400">_</span>, ya que Zig no nos permite tener valores no utilizados.
+
+<Prism lang="zig" code={`test "for" {
+    // Los literales de caracteres son equivalentes a los literales enteros
+    const string = [_]u8{ 'a', 'b', 'c' };
+
+    for (string, 0..) |character, index| {
+        _ = character;
+        _ = index;
+    }
+
+    for (string) |character| {
+        _ = character;
+    }
+
+    for (string, 0..) |_, index| {
+        _ = index;
+    }
+
+    for (string) |_| {}
+}`}/>
+
+<EditThisPage  url={sideMenuUrls[4].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[3].label} subText="Anterior" isRight={false} url={sideMenuUrls[3].url}/>
+    <NextButton text={sideMenuUrls[5].label} subText="Siguiente" isRight={true} url={sideMenuUrls[5].url}/>
+</div>
+</div>

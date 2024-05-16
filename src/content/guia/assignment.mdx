@@ -1,0 +1,43 @@
+---
+title: 'Asignacion | Assignment'
+description: 'Lorem ipsum dolor sit amet'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+  <h1 class="text-white py-8">Asignacion</h1>
+
+  La asignación de valores tiene la siguiente sintaxis: <span class="bg-gray-800 rounded-md px-2 text-purple-400">(const|var) identificador[: type] = valor</span>.
+
+  <ul class="ml-10 list-disc">
+    <li><span class="bg-gray-800 rounded-md px-2 text-purple-400">"const"</span> indica que el identificador es una constante que almacena un valor inmutable.</li>
+    <li><span class="bg-gray-800 rounded-md px-2 text-purple-400">"var"</span> indica que el identificador es una variable que almacena un valor mutable.</li>
+    <li><span class="bg-gray-800 rounded-md px-2 text-purple-400">": type"</span> es una anotación de tipo para el identificador y puede ser omitida si el <span class="bg-gray-800 rounded-md px-2 text-purple-400">type</span> de dato del <span class="bg-gray-800 rounded-md px-2 text-purple-400">valor</span> puede ser inferido.</li>
+  </ul>
+
+  <Prism lang="zig" code={`const constant: i32 = 5; // constante con signo de 32 bits
+var variable: u32 = 5000; // variable sin signo de 32 bits
+
+// @as realiza una coerción de tipo explícita
+const inferred_constant = @as(i32, 5);
+var inferred_variable = @as(u32, 5000);`}/>
+
+Las constantes y variables deben tener un valor. Si no se puede proporcionar un valor conocido, se puede utilizar el valor <span class="bg-gray-800 rounded-md px-2 text-purple-400">undefined</span>, el cual se convierte a cualquier tipo, siempre y cuando se proporcione una anotación de tipo.
+<Prism lang="zig" code={`const a: i32 = undefined;
+var b: u32 = undefined;`}/>
+
+Cuando sea posible, se prefieren los valores constantes <span class="bg-gray-800 rounded-md px-2 text-purple-400">(const)</span> sobre los valores variables <span class="bg-gray-800 rounded-md px-2 text-purple-400">(var)</span>.
+
+<EditThisPage  url={sideMenuUrls[0].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={""} subText="" isRight={false} url={sideMenuUrls[0].url}/>
+    <NextButton text={sideMenuUrls[1].label} subText="Siguiente" isRight={true} url={sideMenuUrls[1].url}/>
+</div>
+</div>

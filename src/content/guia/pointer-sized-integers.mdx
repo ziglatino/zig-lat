@@ -1,0 +1,30 @@
+---
+title: 'Enteros del tamaño de un puntero'
+description: 'usize e isize se dan como enteros sin signo y con signo que tienen el mismo tamaño que los punteros.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Enteros del tamaño de un puntero</h1>
+
+<span class="bg-gray-800 rounded-md px-2 text-purple-400">usize</span> e <span class="bg-gray-800 rounded-md px-2 text-purple-400">isize</span> se dan como enteros sin signo y con signo que tienen el mismo tamaño que los punteros.
+
+<Prism lang="zig" code={`test "usize" {
+    try expect(@sizeOf(usize) == @sizeOf(*u8));
+    try expect(@sizeOf(isize) == @sizeOf(*u8));
+}`}/>
+
+
+<EditThisPage  url={sideMenuUrls[11].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[10].label} subText="Anterior" isRight={false} url={sideMenuUrls[10].url}/>
+    <NextButton text={sideMenuUrls[12].label} subText="Siguiente" isRight={true} url={sideMenuUrls[12].url}/>
+</div>
+</div>

@@ -1,0 +1,109 @@
+---
+title: 'Errors'
+description: Un conjunto de errores es similar a un enum (los detalles sobre los enums de Zig se verán más adelante), donde cada error en el conjunto es un valor. No hay excepciones en Zig; los errores son valores. Vamos a crear un conjunto de errores.'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Errores</h1>
+
+Un conjunto de errores es similar a un enum (los detalles sobre los enums de Zig se verán más adelante), donde cada error en el conjunto es un valor. No hay excepciones en Zig; los errores son valores. Vamos a crear un conjunto de errores.
+
+<Prism lang="zig" code={`const FileOpenError = error{
+    AccessDenied,
+    OutOfMemory,
+    FileNotFound,
+};`}/>
+
+Los conjuntos de errores se coercen a sus superconjuntos
+
+<Prism lang="zig" code={`const AllocationError = error{OutOfMemory};
+
+test "coerción de error de un subconjunto a un superconjunto" {
+    const err: FileOpenError = AllocationError.OutOfMemory;
+    try expect(err == FileOpenError.OutOfMemory);
+}`}/>
+
+Un tipo de conjunto de errores y otro tipo pueden combinarse con el operador ! para formar un tipo de unión de errores. Los valores de estos tipos pueden ser un valor de error o un valor del otro tipo.
+
+Creemos un valor de un tipo de unión de errores. Aquí se usa <span class="bg-gray-800 rounded-md px-2 text-green-400">catch</span>, seguido de una expresión que se evalúa cuando el valor precedente es un error. El catch aquí se usa para proporcionar un valor de respaldo, pero también podría ser un <span class="bg-gray-800 rounded-md px-2 text-purple-400">noreturn</span> - el tipo de <span class="bg-gray-800 rounded-md px-2 text-purple-400">return</span>, <span class="bg-gray-800 rounded-md px-2 text-purple-400">while (true)</span> y otros.
+
+<Prism lang="zig" code={`fn failingFunction() error{Oops}!void {
+    return error.Oops;
+}
+
+test "devolviendo un error" {
+    failingFunction() catch |err| {
+        try expect(err == error.Oops);
+        return;
+    };
+}`}/>
+
+<span class="bg-gray-800 rounded-md px-2 text-purple-400">try x</span> es un atajo para <span class="bg-gray-800 rounded-md px-2 text-purple-400">x catch |err| return err</span>, y se utiliza comúnmente cuando no es apropiado manejar un error. El <span class="bg-gray-800 rounded-md px-2 text-green-400">try</span> y <span class="bg-gray-800 rounded-md px-2 text-green-400">catch</span> de Zig no están relacionados con try-catch en otros lenguajes.
+
+<Prism lang="zig" code={`fn failFn() error{Oops}!i32 {
+    try failingFunction();
+    return 12;
+}
+
+test "try" {
+    const v = failFn() catch |err| {
+        try expect(err == error.Oops);
+        return;
+    };
+    try expect(v == 12); // nunca se alcanza
+}`}/>
+
+<span class="bg-gray-800 rounded-md px-2 text-green-400">errdefer</span> funciona como <span class="bg-gray-800 rounded-md px-2 text-green-400">defer</span>, pero solo se ejecuta cuando la función se devuelve con un error dentro del bloque de <span class="bg-gray-800 rounded-md px-2 text-green-400">errdefer's</span>.
+
+<Prism lang="zig" code={`var problems: u32 = 98;
+
+fn failFnCounter() error{Oops}!void {
+    errdefer problems += 1;
+    try failingFunction();
+}
+
+test "errdefer" {
+    failFnCounter() catch |err| {
+        try expect(err == error.Oops);
+        try expect(problems == 99);
+        return;
+    };
+}`}/>
+
+Las uniones de errores devueltas desde una función pueden tener sus conjuntos de errores inferidos al no tener un conjunto de errores explícito. Este conjunto de errores inferido contiene todos los errores posibles que la función puede devolver.
+
+<Prism lang="zig" code={`fn createFile() !void {
+    return error.AccessDenied;
+}
+
+test "inferred error set" {
+    // La coerción de tipo se lleva a cabo con éxito
+    const x: error{AccessDenied}!void = createFile();
+
+    // Zig no nos permite ignorar las uniones de errores mediante _ = x;
+    // debemos desenvolverlo con "try", "catch" o "if" de alguna manera
+    _ = x catch {};
+}`}/>
+
+Los conjuntos de errores pueden fusionarse.
+
+<Prism lang="zig" code={`const A = error{ NotDir, PathNotFound };
+const B = error{ OutOfMemory, PathNotFound };
+const C = A || B;`}/>
+
+<span class="bg-gray-800 rounded-md px-2 text-purple-400">anyerror</span> es el conjunto de errores global, que al ser el superconjunto de todos los conjuntos de errores, puede tener un error de cualquier conjunto coercido a él. Su uso debe evitarse en general.
+
+<EditThisPage  url={sideMenuUrls[7].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[6].label} subText="Anterior" isRight={false} url={sideMenuUrls[6].url}/>
+    <NextButton text={sideMenuUrls[8].label} subText="Siguiente" isRight={true} url={sideMenuUrls[8].url}/>
+</div>
+</div>

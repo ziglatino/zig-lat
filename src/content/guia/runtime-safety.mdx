@@ -1,0 +1,83 @@
+---
+title: 'Runtime Safety'
+description: 'Zig proporciona un nivel de seguridad donde los problemas pueden ser encontrados durante la ejecución. La seguridad puede ser dejada activada o desactivada. Zig tiene muchos casos de lo que se llama __comportamiento ilegal detectable__, lo que significa que el comportamiento ilegal será detectado (causando un pánico) con la seguridad activada, pero resultará en un comportamiento indefinido con la seguridad desactivada. Se recomienda encarecidamente a los usuarios que desarrollen y prueben su software con la seguridad activada, a pesar de las penalizaciones de velocidad.'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Runtime Safety</h1>
+
+Zig proporciona un nivel de seguridad donde los problemas pueden ser encontrados durante la ejecución. La seguridad puede ser dejada activada o desactivada. Zig tiene muchos casos de lo que se llama __comportamiento ilegal detectable__, lo que significa que el comportamiento ilegal será detectado (causando un pánico) con la seguridad activada, pero resultará en un comportamiento indefinido con la seguridad desactivada. Se recomienda encarecidamente a los usuarios que desarrollen y prueben su software con la seguridad activada, a pesar de las penalizaciones de velocidad.
+
+Por ejemplo, la seguridad en tiempo de ejecución te protege de índices fuera de límites.
+
+<Prism lang="zig" code={`test "fuera de límites" {
+    const a = [3]u8{ 1, 2, 3 };
+    var index: u8 = 5;
+    const b = a[index];
+    _ = b;
+}`}/>
+
+<Prism lang="zig" code={`test "out of bounds"...index out of bounds
+.\tests.zig:43:14: 0x7ff698cc1b82 in test "out of bounds" (test.obj)
+    const b = a[index];
+             ^`}/>
+
+El usuario puede desactivar la seguridad en tiempo de ejecución para el bloque actual utilizando la función integrada <span class="bg-gray-800 rounded-md px-2 text-green-400">@setRuntimeSafety</span>.
+
+<Prism lang="zig" code={`test "Fuera de limites, No seguro" {
+    @setRuntimeSafety(false);
+    const a = [3]u8{ 1, 2, 3 };
+    var index: u8 = 5;
+    const b = a[index];
+    _ = b;
+}`}/>
+
+La seguridad está desactivada para algunos modos de compilación (que se discutirán más adelante).
+
+<h2 class="text-white py-4">Unreachable</h2>
+
+<span class="bg-gray-800 rounded-md px-2 text-green-400">unreachable</span> es una afirmación para el compilador de que esta declaración no será alcanzada. Puede decirle al compilador que una rama es imposible, lo que el optimizador puede aprovechar. Alcanzar un <span class="bg-gray-800 rounded-md px-2 text-green-400">unreachable</span> es un comportamiento ilegal detectable.
+
+Como es del tipo <span class="bg-gray-800 rounded-md px-2 text-green-400">noreturn</span>, es compatible con todos los demás tipos. Aquí se coerciona a u32.
+
+<Prism lang="zig" code={`test "unreachable" {
+    const x: i32 = 1;
+    const y: u32 = if (x == 2) 5 else unreachable;
+    _ = y;
+}`}/>
+
+<Prism lang="zig" code={`test "unreachable"...reached unreachable code
+.\tests.zig:211:39: 0x7ff7e29b2049 in test "unreachable" (test.obj)
+    const y: u32 = if (x == 2) 5 else unreachable;
+                                      ^`}/>
+
+Aquí se muestra un unreachable siendo utilizado en un switch.
+
+<Prism lang="zig" code={`fn asciiToUpper(x: u8) u8 {
+    return switch (x) {
+        'a'...'z' => x + 'A' - 'a',
+        'A'...'Z' => x,
+        else => unreachable,
+    };
+}
+
+test "unreachable switch" {
+    try expect(asciiToUpper('a') == 'A');
+    try expect(asciiToUpper('A') == 'A');
+}`}/>
+
+
+<EditThisPage  url={sideMenuUrls[9].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[8].label} subText="Anterior" isRight={false} url={sideMenuUrls[8].url}/>
+    <NextButton text={sideMenuUrls[10].label} subText="Siguiente" isRight={true} url={sideMenuUrls[10].url}/>
+</div>
+</div>

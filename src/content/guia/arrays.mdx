@@ -1,0 +1,36 @@
+---
+title: 'Arreglos | Arrays'
+description: 'Lorem ipsum dolor sit amet'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Arrays</h1>
+
+Los arrays se representan como <span class="bg-gray-800 rounded-md px-2 text-purple-400">[N]T</span>, donde <span class="bg-gray-800 rounded-md px-2 text-purple-400">N</span> es el número de elementos en el array y <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span> es el tipo de esos elementos (es decir, el tipo hijo del array).
+
+Para literales de array, <span class="bg-gray-800 rounded-md px-2 text-purple-400">N</span> puede ser reemplazado por <span class="bg-gray-800 rounded-md px-2 text-purple-400">_</span> para inferir el tamaño del array.
+
+
+<Prism lang="zig" code={`const a = [4]u8{ 'h', 'o', 'l', 'a',  };
+const b = [_]u8{ 'm', 'u', 'n', 'd', 'o' };`}/>
+
+Para obtener el tamaño de un array, simplemente accede al campo <span class="bg-gray-800 rounded-md px-2 text-purple-400">len</span> del array.
+
+
+<Prism lang="zig" code={`const array = [_]u8{ 'h', 'o', 'l', 'a' };
+const length = array.len; // 4`}/>
+
+<EditThisPage  url={sideMenuUrls[1].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[0].label} subText="Anterior" isRight={false} url={sideMenuUrls[0].url}/>
+    <NextButton text={sideMenuUrls[2].label} subText="Siguiente" isRight={true} url={sideMenuUrls[2].url}/>
+</div>
+</div>

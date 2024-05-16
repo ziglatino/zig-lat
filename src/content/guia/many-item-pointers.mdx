@@ -1,0 +1,26 @@
+---
+title: 'Punteros de varios elementos'
+description: 'A veces, puedes tener un puntero a un número desconocido de elementos. [*]T es la solución para esto, que funciona como *T pero también admite la sintaxis de indexación, aritmética de punteros y fragmentación. A diferencia de *T, no puede apuntar a un tipo que no tenga un tamaño conocido. *T se convierte en [*]T.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Punteros de varios elementos</h1>
+
+A veces, puedes tener un puntero a un número desconocido de elementos. <span class="bg-gray-800 rounded-md px-2 text-purple-400">[*]T</span> es la solución para esto, que funciona como <span class="bg-gray-800 rounded-md px-2 text-purple-400">*T</span> pero también admite la sintaxis de indexación, aritmética de punteros y fragmentación. A diferencia de <span class="bg-gray-800 rounded-md px-2 text-purple-400">*T</span>, no puede apuntar a un tipo que no tenga un tamaño conocido. <span class="bg-gray-800 rounded-md px-2 text-purple-400">\*T</span> se convierte en <span class="bg-gray-800 rounded-md px-2 text-purple-400">[\*]T</span>.
+
+Estos punteros de varios elementos pueden apuntar a cualquier cantidad de elementos, incluyendo 0 y 1.
+
+<EditThisPage  url={sideMenuUrls[12].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[11].label} subText="Anterior" isRight={false} url={sideMenuUrls[11].url}/>
+    <NextButton text={sideMenuUrls[13].label} subText="Siguiente" isRight={true} url={sideMenuUrls[13].url}/>
+</div>
+</div>

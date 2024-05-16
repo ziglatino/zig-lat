@@ -1,0 +1,46 @@
+---
+title: 'Defer'
+description: 'Defer se utiliza para ejecutar una declaración al salir del bloque actual/scope.'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Defer</h1>
+
+Defer se utiliza para ejecutar una declaración al salir del bloque actual/scope.
+
+<Prism lang="zig" code={`test "defer" {
+    var x: i16 = 5;
+    {
+        defer x += 2;
+        try expect(x == 5);
+    }
+    try expect(x == 7);
+}`}/>
+
+Cuando hay múltiples defers en un solo bloque, se ejecutan en orden inverso.
+
+<Prism lang="zig" code={`test "multi defer" {
+    var x: f32 = 5;
+    {
+        defer x += 2;
+        defer x /= 2;
+    }
+    try expect(x == 4.5);
+}`}/>
+
+Defer es útil para garantizar que los recursos se limpien cuando ya no sean necesarios. En lugar de tener que recordar liberar manualmente el recurso, puedes agregar una declaración defer justo al lado de la declaración que asigna el recurso.
+
+<EditThisPage url={sideMenuUrls[6].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[5].label} subText="Anterior" isRight={false} url={sideMenuUrls[5].url}/>
+    <NextButton text={sideMenuUrls[7].label} subText="Siguiente" isRight={true} url={sideMenuUrls[7].url}/>
+</div>
+</div>

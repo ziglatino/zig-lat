@@ -1,0 +1,64 @@
+---
+title: 'Pointers'
+description: 'Los punteros normales en Zig no pueden tener 0 o null como valor. Siguen la sintaxis *T, donde T es el tipo hijo.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Pointers</h1>
+
+Los punteros normales en Zig no pueden tener 0 o null como valor. Siguen la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">*T</span>, donde <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span> es el tipo hijo.
+
+La referencia se realiza con <span class="bg-gray-800 rounded-md px-2 text-purple-400">&variable</span> y la desreferencia se realiza con <span class="bg-gray-800 rounded-md px-2 text-purple-400">variable.*</span>.
+
+<Prism lang="zig" code={`fn increment(num: *u8) void {
+    num.* += 1;
+}
+
+test "pointers" {
+    var x: u8 = 1;
+    increment(&x);
+    try expect(x == 2);
+}`}/>
+
+
+Intentar establecer un <span class="bg-gray-800 rounded-md px-2 text-purple-400">*T</span> en el valor 0 es un comportamiento ilegal detectable.
+
+<Prism lang="zig" code={`test "naughty pointer" {
+    var x: u16 = 0;
+    var y: *u8 = @ptrFromInt(x);
+    _ = y;
+}`}/>
+
+<Prism lang="zig" code={`Test [23/126] test.naughty pointer... thread 21598 panic: cast causes pointer to be null
+./test-c1.zig:252:18: 0x260a91 in test.naughty pointer (test)
+    var y: *u8 = @ptrFromInt(x);
+                 ^`}/>
+
+Zig también tiene punteros constantes, que no pueden ser utilizados para modificar los datos referenciados. Referenciar una variable constante producirá un puntero constante.
+
+<Prism lang="zig" code={`test "const pointers" {
+    const x: u8 = 1;
+    var y = &x;
+    y.* += 1;
+}`}/>
+
+<Prism lang="zig" code={`error: cannot assign to constant
+    y.* += 1;
+        ^`}/>
+
+Un <span class="bg-gray-800 rounded-md px-2 text-purple-400">*T</span> se convierte en un <span class="bg-gray-800 rounded-md px-2 text-purple-400">*const T</span>.
+
+<EditThisPage  url={sideMenuUrls[10].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[9].label} subText="Anterior" isRight={false} url={sideMenuUrls[9].url}/>
+    <NextButton text={sideMenuUrls[11].label} subText="Siguiente" isRight={true} url={sideMenuUrls[11].url}/>
+</div>
+</div>

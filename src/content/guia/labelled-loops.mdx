@@ -1,0 +1,35 @@
+---
+title: 'Labelled Loops'
+description: 'Los bucles pueden recibir etiquetas, lo que te permite utilizar break y continue en bucles externos.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Labelled Loops</h1>
+
+Los bucles pueden recibir etiquetas, lo que te permite utilizar <span class="bg-gray-800 rounded-md px-2 text-purple-400">break</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">continue</span> en bucles externos.
+
+<Prism lang="zig" code={`test "nested continue" {
+    var count: usize = 0;
+    outer: for ([_]i32{ 1, 2, 3, 4, 5, 6, 7, 8 }) |_| {
+        for ([_]i32{ 1, 2, 3, 4, 5 }) |_| {
+            count += 1;
+            continue :outer;
+        }
+    }
+    try expect(count == 8);
+}`}/>
+
+<EditThisPage url={sideMenuUrls[20].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[19].label} subText="Anterior" isRight={false} url={sideMenuUrls[19].url}/>
+    <NextButton text={sideMenuUrls[21].label} subText="Siguiente" isRight={true} url={sideMenuUrls[21].url}/>
+</div>
+</div>

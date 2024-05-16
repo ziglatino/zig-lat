@@ -1,0 +1,35 @@
+---
+title: 'Inline Loops'
+description: 'Los bucles en línea son desenrollados, y permiten que ocurran algunas cosas que sólo funcionan en tiempo de compilación. Aquí usamos un for, pero un while funciona de forma similar.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Inline Loops</h1>
+
+
+
+Los bucles <span class="bg-gray-800 rounded-md px-2 text-purple-400">inline</span> son desenrollados, y permiten que ocurran algunas cosas que sólo funcionan en tiempo de compilación. Aquí usamos un for, pero un while funciona de forma similar.
+
+<Prism lang="zig" code={`test "inline for" {
+    const types = [_]type{ i32, f32, u8, bool };
+    var sum: usize = 0;
+    inline for (types) |T| sum += @sizeOf(T);
+    try expect(sum == 10);
+}`}/>
+
+Su uso por razones de rendimiento es desaconsejable a menos que haya probado que el desenrollado explícito es más rápido; el compilador tiende a tomar mejores decisiones aquí que usted.
+
+<EditThisPage url={sideMenuUrls[25].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[24].label} subText="Anterior" isRight={false} url={sideMenuUrls[24].url}/>
+    <NextButton text={sideMenuUrls[26].label} subText="Siguiente" isRight={true} url={sideMenuUrls[26].url}/>
+</div>
+</div>

@@ -1,0 +1,124 @@
+---
+title: 'Payload Captures'
+description: 'Las capturas de carga utilizan la sintaxis |valor| y aparecen en muchos lugares, algunos de los cuales ya hemos visto. Dondequiera que aparezcan, se utilizan para "capturar" el valor de algo.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Payload Captures</h1>
+
+Las capturas de carga utilizan la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">|valor|</span> y aparecen en muchos lugares, algunos de los cuales ya hemos visto. Dondequiera que aparezcan, se utilizan para "capturar" el valor de algo.
+
+Con las declaraciones if y los optionals.
+
+<Prism lang="zig" code={`test "optional-if" {
+    const maybe_num: ?usize = 10;
+    if (maybe_num) |n| {
+        try expect(@TypeOf(n) == usize);
+        try expect(n == 10);
+    } else {
+        unreachable;
+    }
+}`}/>
+
+Con las declaraciones if y las uniones de errores. El else con la captura de error es requerido aquí.
+
+<Prism lang="zig" code={`test "error union if" {
+    const ent_num: error{UnknownEntity}!u32 = 5;
+    if (ent_num) |entity| {
+        try expect(@TypeOf(entity) == u32);
+        try expect(entity == 5);
+    } else |err| {
+        _ = err catch {};
+        unreachable;
+    }
+}`}/>
+
+Con los bucles while y los optionals. Esto puede tener un bloque else.
+
+<Prism lang="zig" code={`test "while optional" {
+    var i: ?u32 = 10;
+    while (i) |num| : (i.? -= 1) {
+        try expect(@TypeOf(num) == u32);
+        if (num == 1) {
+            i = null;
+            break;
+        }
+    }
+    try expect(i == null);
+}`}/>
+
+Con los bucles while y las uniones de errores. El else con la captura de error es requerido aquí.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+var numbers_left2: u32 = undefined;
+
+fn eventuallyErrorSequence() !u32 {
+    return if (numbers_left2 == 0) error.ReachedZero else blk: {
+        numbers_left2 -= 1;
+        break :blk numbers_left2;
+    };
+}
+
+test "while error union capture" {
+    var sum: u32 = 0;
+    numbers_left2 = 3;
+    while (eventuallyErrorSequence()) |value| {
+        sum += value;
+    } else |err| {
+        try expect(err == error.ReachedZero);
+    }
+}`}/>
+
+Para loops.
+
+<Prism lang="zig" code={`test "for capture" {
+    const x = [_]i8{ 1, 5, 120, -5 };
+    for (x) |v| try expect(@TypeOf(v) == i8);
+}`}/>
+
+Casos de switch en uniones etiquetadas.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+const Info = union(enum) {
+    a: u32,
+    b: []const u8,
+    c,
+    d: u32,
+};
+
+test "switch capture" {
+    const b = Info{ .a = 10 };
+    const x = switch (b) {
+        .b => |str| blk: {
+            try expect(@TypeOf(str) == []const u8);
+            break :blk 1;
+        },
+        .c => 2,
+        // Si estos son del mismo tipo, 
+        //pueden estar dentro del mismo grupo de captura.
+        .a, .d => |num| blk: {
+            try expect(@TypeOf(num) == u32);
+            break :blk num * 2;
+        },
+    };
+    try expect(x == 20);
+}`}/>
+
+Como vimos en las secciones de Union y Optional anteriormente, los valores capturados con la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">|val|</span> son inmutables (similar a los argumentos de función), pero podemos usar la captura de puntero para modificar los valores originales. Esto captura los valores como punteros que aún son inmutables, pero debido a que el valor es ahora un puntero, podemos modificar el valor original desreferenciándolo:
+
+<EditThisPage sideMenuUrls={sideMenuUrls[24].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[23].label} subText="Anterior" isRight={false} url={sideMenuUrls[23].url}/>
+    <NextButton text={sideMenuUrls[25].label} subText="Siguiente" isRight={true} url={sideMenuUrls[25].url}/>
+</div>
+</div>

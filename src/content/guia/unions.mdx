@@ -1,0 +1,66 @@
+---
+title: 'Unions'
+description: 'Los Unions pueden pensarse como un par de [*]T (el puntero a los datos) y un usize (el conteo de elementos). Su sintaxis es []T, donde T es el tipo hijo. Los Unions se utilizan ampliamente en Zig cuando necesitas operar sobre cantidades arbitrarias de datos. Los Unions tienen los mismos atributos que los punteros, lo que significa que también existen Unions constantes. Los bucles for también operan sobre Unions. Las literales de cadena en Zig se convierten en []const u8.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Unions</h1>
+
+Las unions de Zig te permiten definir tipos que almacenan un valor de muchos campos con tipos posibles; solo un campo puede estar activo a la vez.
+
+Los tipos de unión sin formato no tienen un diseño de memoria garantizado. Debido a esto, las uniones sin formato no se pueden utilizar para reinterpretar la memoria. Acceder a un campo en una unión que no está activo es un comportamiento ilegal detectable.
+
+<Prism lang="zig" code={`const Result = union {
+    int: i64,
+    float: f64,
+    bool: bool,
+};
+
+test "simple union" {
+    var result = Result{ .int = 1234 };
+    result.float = 12.34;
+}`}/>
+
+<Prism lang="zig" code={`test "simple union"... acceso a un campo inactivo de la unión
+.\tests.zig:342:12: 0x7ff62c89244a en la prueba "simple union" (test.obj)
+    result.float = 12.34;`}/>
+           
+
+Las uniones etiquetadas son uniones que utilizan una enumeración para detectar qué campo está activo. Aquí volvemos a utilizar la captura de carga útil para cambiar según el tipo de etiqueta de una unión, capturando al mismo tiempo el valor que contiene. Aquí utilizamos una captura de puntero; los valores capturados son inmutables, pero con la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">|*value|</span>, podemos capturar un puntero a los valores en lugar de los valores en sí. Esto nos permite utilizar la desreferenciación para mutar el valor original.
+
+<Prism lang="zig" code={`const Tag = enum { a, b, c };
+
+const Tagged = union(Tag) { a: u8, b: f32, c: bool };
+
+test "switch en una unión etiquetada" {
+    var value = Tagged{ .b = 1.5 };
+    switch (value) {
+        .a => |*byte| byte.* += 1,
+        .b => |*float| float.* *= 2,
+        .c => |*b| b.* = !b.*,
+    }
+    try expect(value.b == 3);
+}`}/>
+
+El tipo de etiqueta de una unión etiquetada también se puede inferir. Esto es equivalente al tipo Tagged anterior.
+
+<Prism lang="zig" code={`const Tagged = union(enum) { a: u8, b: f32, c: bool };`}/>
+
+Los tipos de miembros <span class="bg-gray-800 rounded-md px-2 text-purple-400">void</span> pueden tener su tipo omitido en la sintaxis. Aquí, none es de tipo <span class="bg-gray-800 rounded-md px-2 text-purple-400">void</span>.
+
+<Prism lang="zig" code={`const Tagged2 = union(enum) { a: u8, b: f32, c: bool, none };`}/>
+
+<EditThisPage url={sideMenuUrls[16].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[15].label} subText="Anterior" isRight={false} url={sideMenuUrls[15].url}/>
+    <NextButton text={sideMenuUrls[17].label} subText="Siguiente" isRight={true} url={sideMenuUrls[17].url}/>
+</div>
+</div>

@@ -1,0 +1,106 @@
+---
+title: 'Guia de estilos'
+description: 'Guia de estilos en zig'
+pubDate: 'Jul 02 2022'
+heroImage: '/blog-placeholder-5.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+
+En esta breve sección, cubriremos dos reglas de codificación impuestas por el compilador, así como la convención de nombres de la biblioteca estándar.
+
+<hr />
+
+<br/>
+
+<a id="variables-no-utilizadas" class="no-underline text-black hover:underline hover:text-black" href="/aprende/guia-de-estilos/#variables-no-utilizadas"><h2 class="text-4xl">Variables no utilizadas</h2></a>
+
+Zig no permite que las variables queden sin usar. Lo siguiente produce dos errores en tiempo de compilación:
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() void {
+	const sum = add(8999, 2);
+}
+
+fn add(a: i64, b: i64) i64 {
+    // nota que esto es a + a, no a + b
+	return a + a;
+}`}/>
+
+<br/>
+
+
+El primer error se debe a que la suma es una constante local no utilizada. El segundo error es porque b es un parámetro de función no utilizado. En este código, estos son errores evidentes. Pero podrías tener razones legítimas para tener variables y parámetros de función no utilizados. En tales casos, puedes asignar las variables a un guión bajo (_):
+
+<Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() void {
+	_ = add(8999, 2);
+
+	// o
+
+	const sum = add(8999, 2);
+	_ = sum;
+}
+
+fn add(a: i64, b: i64) i64 {
+	_ = b;
+	return a + a;
+}`}/>
+
+<br/>
+
+Como alternativa a hacer `_ = b;`, podríamos haber nombrado el parámetro de función `_`. Sin embargo, en mi opinión, esto deja al lector adivinando cuál es el parámetro no utilizado:
+
+<Prism lang="zig" code={`fn add(a: i64, _: i64) i64 {`} />
+
+<br/>
+
+Observa que std también está sin usar pero no genera un error. En algún momento en el futuro, espera que Zig también trate esto como un error en tiempo de compilación.
+
+<hr />
+
+<br/>
+
+<a id="sombreado-shadowing" class="no-underline text-black hover:underline hover:text-black" href="/aprende/guia-de-estilos/#sombreado-shadowing"><h2 class="text-4xl">Sombreado/Shadowing</h2></a>
+
+Zig no permite que un identificador "oculte" otro al usar el mismo nombre. Este código, para leer de un socket, no es válido:
+
+<Prism lang="zig" code={`fn read(stream: std.net.Stream) ![]const u8 {
+	var buf: [512]u8 = undefined;
+	const read = try stream.read(&buf);
+	if (read == 0) {
+		return error.Closed;
+	}
+	return buf[0..read];
+}`}/>
+
+<br/>
+
+
+Nuestra variable `read` sombrea el nombre de nuestra función. No soy partidario de esta regla, ya que generalmente lleva a los desarrolladores a usar nombres cortos y sin significado. Por ejemplo, para hacer que este código compile, cambiaría `"read"` a `"n"`. Este es un caso en el que, en mi opinión, los desarrolladores están en una posición mucho mejor para elegir la opción más legible.
+
+<hr/>
+<br/>
+
+<a id="convencion-de-nombres" class="no-underline text-black hover:underline hover:text-black" href="/aprende/guia-de-estilos/#convencion-de-nombres"><h2 class="text-4xl">Convención de nombres</h2></a>
+
+Además de las reglas impuestas por el compilador, por supuesto, eres libre de seguir la convención de nombres que prefieras. Sin embargo, ayuda entender la convención de nombres propia de Zig, ya que gran parte del código con el que interactuarás, desde la biblioteca estándar hasta las bibliotecas de terceros, la utiliza.
+
+El código fuente de Zig se indentifica con 4 espacios. Personalmente, uso una tabulación, que es objetivamente mejor para la accesibilidad.
+
+Los nombres de las funciones son camelCase y las variables son lowercase_with_underscores (también conocido como snake case). Los tipos se escriben en PascalCase. Hay una interesante intersección entre estas tres reglas. Las variables que hacen referencia a un tipo, o las funciones que devuelven un tipo, siguen la regla del tipo y se escriben en PascalCase. Ya lo vimos anteriormente, aunque quizás no te diste cuenta.
+
+<Prism lang="zig" code={`std.debug.print("{any}", .{@TypeOf(.{.year = 2023, .month = 8})});`} />
+<br/>
+
+Hemos visto otras funciones integradas: `@import`, `@rem` y `@intCast`. Como son funciones, están en camelCase. `@TypeOf` también es una función integrada, pero está en PascalCase, ¿por qué? Porque devuelve un tipo y, por lo tanto, se utiliza la convención de nombres de tipos. Si asignáramos el resultado de `@TypeOf` a una variable, siguiendo la convención de nombres de Zig, esa variable también debería estar en PascalCase:
+
+<Prism lang="zig" code={`const T = @TypeOf(3)
+std.debug.print("{any}", .{T});`}/>
+<br/>
+<hr/>
+<br/>
+
+El ejecutable de Zig tiene un comando fmt que, dado un archivo o un directorio, formateará el archivo según la propia guía de estilo de Zig. Sin embargo, no cubre todo, por ejemplo, ajustará la identacion y la posición de las llaves, pero no cambiará el estilo de los identificadores.

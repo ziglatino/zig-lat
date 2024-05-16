@@ -1,0 +1,29 @@
+---
+title: 'Imports'
+description: 'Zig proporciona tipos de vectores para SIMD. Estos no deben ser confundidos con vectores en un sentido matemático, o vectores como los de std::vector en C++ (para esto, ver "Arraylist" en el capítulo 2). Los vectores pueden ser creados usando el built-in @Type que usamos anteriormente, y std.meta.Vector proporciona una forma abreviada para esto.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Imports</h1>
+
+
+La función integrada <span class="bg-gray-800 rounded-md px-2 text-green-400">@import</span> toma un archivo y te proporciona un tipo de estructura basado en ese archivo. Todas las declaraciones etiquetadas como <span class="bg-gray-800 rounded-md px-2 text-purple-400">pub</span> (para público) terminarán en este tipo de estructura, listas para su uso.
+
+<span class="bg-gray-800 rounded-md px-2 text-green-400">@import("std")</span> es un caso especial en el compilador, y te da acceso a la biblioteca estándar. Otros <span class="bg-gray-800 rounded-md px-2 text-green-400">@imports</span> tomarán una ruta de archivo o un nombre de paquete (más sobre paquetes en un capítulo posterior).
+
+Exploraremos más de la biblioteca estándar en capítulos posteriores.
+
+<EditThisPage url={sideMenuUrls[30].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[29].label} subText="Anterior" isRight={false} url={sideMenuUrls[29].url}/>
+    <NextButton text={sideMenuUrls[30].label} subText="Siguiente" isRight={true} url={sideMenuUrls[30].url}/>
+</div>
+</div>

@@ -1,0 +1,38 @@
+---
+title: 'Slices'
+description: 'Los slices pueden pensarse como un par de [*]T (el puntero a los datos) y un usize (el conteo de elementos). Su sintaxis es []T, donde T es el tipo hijo. Los slices se utilizan ampliamente en Zig cuando necesitas operar sobre cantidades arbitrarias de datos. Los slices tienen los mismos atributos que los punteros, lo que significa que también existen slices constantes. Los bucles for también operan sobre slices. Las literales de cadena en Zig se convierten en []const u8.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Slices</h1>
+
+Los slices pueden pensarse como un par de <span class="bg-gray-800 rounded-md px-2 text-purple-400">[\*]T</span> (el puntero a los datos) y un <span class="bg-gray-800 rounded-md px-2 text-purple-400">usize</span> (el conteo de elementos). Su sintaxis es <span class="bg-gray-800 rounded-md px-2 text-purple-400">[]T</span>, donde <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span> es el tipo hijo. Los slices se utilizan ampliamente en Zig cuando necesitas operar sobre cantidades arbitrarias de datos. Los slices tienen los mismos atributos que los punteros, lo que significa que también existen slices constantes. Los bucles for también operan sobre slices. Las literales de cadena en Zig se convierten en <span class="bg-gray-800 rounded-md px-2 text-purple-400">[]const u8</span>.
+
+Aquí, la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">x[n..m]</span> se utiliza para crear un slice a partir de un array. Esto se llama fragmentación, y crea un slice de los elementos que comienzan en <span class="bg-gray-800 rounded-md px-2 text-purple-400">x[n]</span> y terminan en <span class="bg-gray-800 rounded-md px-2 text-purple-400">x[m - 1]</span>. Este ejemplo utiliza un slice constante, ya que los valores a los que apunta el slice no necesitan ser modificados.
+
+<Prism lang="zig" code={`fn total(values: []const u8) usize {
+    var sum: usize = 0;
+    for (values) |v| sum += v;
+    return sum;
+}
+
+test "slices" {
+    const array = [_]u8{ 1, 2, 3, 4, 5 };
+    const slice = array[0..3];
+    try expect(total(slice) == 6);
+}`}/>
+
+<EditThisPage  url={sideMenuUrls[13].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[12].label} subText="Anterior" isRight={false} url={sideMenuUrls[12].url}/>
+    <NextButton text={sideMenuUrls[14].label} subText="Siguiente" isRight={true} url={sideMenuUrls[14].url}/>
+</div>
+</div>

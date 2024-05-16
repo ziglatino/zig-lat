@@ -1,0 +1,94 @@
+---
+title: 'Optionals'
+description: 'Los optionals usan la sintaxis ?T y se utilizan para almacenar el valor null o un valor de tipo T.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Optionals</h1>
+
+Los optionals usan la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">?T</span> y se utilizan para almacenar el valor <span class="bg-gray-800 rounded-md px-2 text-green-400">null</span> o un valor de tipo <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span>.
+
+<Prism lang="zig" code={`test "optional" {
+    var found_index: ?usize = null;
+    const data = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 12 };
+    for (data, 0..) |v, i| {
+        if (v == 10) found_index = i;
+    }
+    try expect(found_index == null);
+}`}/>
+
+Los optionals admiten la expresión orelse, que actúa cuando el optional es <span class="bg-gray-800 rounded-md px-2 text-green-400">null</span>. Esto desempaqueta el optional a su tipo hijo.
+
+<Prism lang="zig" code={`test "orelse" {
+    const a: ?f32 = null;
+    const fallback_value: f32 = 0;
+    const b = a orelse fallback_value;
+    try expect(b == 0);
+    try expect(@TypeOf(b) == f32);
+}`}/>
+
+<span class="bg-gray-800 rounded-md px-2 text-purple-400">.?</span> es una forma abreviada para <span class="bg-gray-800 rounded-md px-2 text-purple-400">orelse unreachable</span>. Esto se usa cuando sabes que es imposible que un valor opcional sea <span class="bg-gray-800 rounded-md px-2 text-green-400">null</span>, y usar esto para desempaquetar un valor null es un comportamiento ilegal detectable.
+
+<Prism lang="zig" code={`test "orelse unreachable" {
+    const a: ?f32 = 5;
+    const b = a orelse unreachable;
+    const c = a.?;
+    try expect(b == c);
+    try expect(@TypeOf(c) == f32);
+}`}/>
+
+Tanto las expresiones <span class="bg-gray-800 rounded-md px-2 text-purple-400">if</span> como los bucles <span class="bg-gray-800 rounded-md px-2 text-purple-400">while</span> admiten tomar valores opcionales como condiciones, lo que te permite "capturar" el valor interno no nulo.
+
+Aquí usamos una captura opcional de carga <span class="bg-gray-800 rounded-md px-2 text-purple-400">if</span>; a y b son equivalentes aquí. <span class="bg-gray-800 rounded-md px-2 text-purple-400">if (b) |valor|</span> captura el valor de <span class="bg-gray-800 rounded-md px-2 text-purple-400">b</span> (en los casos donde <span class="bg-gray-800 rounded-md px-2 text-purple-400">b</span> no es null) y lo hace disponible como <span class="bg-gray-800 rounded-md px-2 text-purple-400">valor</span>. Como en el ejemplo de la unión, el valor capturado es inmutable, pero aún podemos usar una captura de puntero para modificar el valor almacenado en <span class="bg-gray-800 rounded-md px-2 text-purple-400">b</span>.
+
+<Prism lang="zig" code={`test "captura opcional de carga en un if" {
+    const a: ?i32 = 5;
+    if (a != null) {
+        const value = a.?;
+        _ = value;
+    }
+
+    var b: ?i32 = 5;
+    if (b) |*value| {
+        value.* += 1;
+    }
+    try expect(b.? == 6);
+}`}/>
+
+Y con while:
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+var numbers_left: u32 = 4;
+fn eventuallyNullSequence() ?u32 {
+    if (numbers_left == 0) return null;
+    numbers_left -= 1;
+    return numbers_left;
+}
+
+test "while null capture" {
+    var sum: u32 = 0;
+    while (eventuallyNullSequence()) |value| {
+        sum += value;
+    }
+    try expect(sum == 6); // 3 + 2 + 1
+}`}/>
+
+Los tipos opcionales de puntero y de slice no ocupan memoria adicional en comparación con los no opcionales. Esto se debe a que internamente utilizan el valor 0 del puntero para <span class="bg-gray-800 rounded-md px-2 text-green-400">null</span>.
+
+Así es como funcionan los punteros nulos en Zig: deben ser desempaquetados a un tipo no opcional antes de desreferenciarlos, lo que evita que ocurran desreferencias de punteros nulos accidentalmente.
+
+<EditThisPage url={sideMenuUrls[22].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[21].label} subText="Anterior" isRight={false} url={sideMenuUrls[21].url}/>
+    <NextButton text={sideMenuUrls[23].label} subText="Siguiente" isRight={true} url={sideMenuUrls[23].url}/>
+</div>
+</div>

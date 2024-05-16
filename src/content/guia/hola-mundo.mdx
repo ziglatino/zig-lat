@@ -1,0 +1,35 @@
+---
+title: 'Hola mundo | Hello world'
+description: 'Lorem ipsum dolor sit amet'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+
+
+<div class="flex flex-col gap-y-5 text-white">
+
+  <h1 class="text-white py-8">Hola Mundo</h1>
+
+  Crea un archivo llamado  <span class="bg-gray-800 rounded-md px-2 text-purple-400">main.zig</span>, con el siguiente contenido:
+  <Prism lang="zig" code={`const std = @import("std");
+
+pub fn main() void {
+    std.debug.print("¡Hola mundo, {s}!\\n", .{"World"});
+}`}/>
+
+Utiliza <span class="bg-gray-800 rounded-md px-2 text-purple-400">zig run main.zig</span> para compilar y ejecutarlo. En este ejemplo, <span class="bg-gray-800 rounded-md px-2 text-purple-400">¡Hola, mundo!</span> será escrito en stderr, y se asume que nunca fallará.
+
+<section class="text-justify">
+  <div
+    class="rounded-lg bg-[#4d3800] flex flex-col  px-4 py-2 border-0 border-l-8 border-[#e6a700]"
+  >
+    <div class="flex place-items-center">
+      <img class="h-10 w-10" src="/warn.svg" alt="" />
+      <h2 class="text-white text-2xl">FOUND 'INVALID BYTES</h2>
+    </div>
+    <p class="text-white text-[14px]">Asegúrate de que tu archivo main.zig esté codificado en UTF-8, ya que el compilador de Zig actualmente no admite otros tipos de codificación. Para volver a codificar tu archivo como UTF-8, ejecuta zig fmt main.zig y vuelve a abrir el archivo en tu editor.</p>
+  </div>
+</section>
+</div>

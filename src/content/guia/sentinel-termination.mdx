@@ -1,0 +1,80 @@
+---
+title: 'Sentinel Termination'
+description: 'Los arrays, slices y muchos punteros pueden ser terminados por un valor de su tipo hijo. Esto se conoce como terminación centinela. Siguen la sintaxis [N:t]T, [:t]T y [*:t]T, donde t es un valor del tipo hijo T.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Sentinel Termination</h1>
+
+Los arrays, slices y muchos punteros pueden ser terminados por un valor de su tipo hijo. Esto se conoce como terminación centinela. Siguen la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">[N:t]T</span>, <span class="bg-gray-800 rounded-md px-2 text-purple-400">[:t]T</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">[*:t]T</span>, donde <span class="bg-gray-800 rounded-md px-2 text-purple-400">t</span> es un valor del tipo hijo <span class="bg-gray-800 rounded-md px-2 text-purple-400">T</span>.
+
+Ejemplo de matriz con terminación centinela. El built-in <span class="bg-gray-800 rounded-md px-2 text-green-400">@ptrCast</span> se utiliza para realizar una conversión de tipo insegura. Esto nos muestra que el último elemento del array va seguido de un byte 0.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "terminación de centinela" {
+    const terminated = [3:0]u8{ 3, 2, 1 };
+    try expect(terminated.len == 3);
+    try expect(@as(*const [4]u8, @ptrCast(&terminated))[3] == 0);
+}`}/>
+
+Los tipos de literales de cadena son <span class="bg-gray-800 rounded-md px-2 text-purple-400">*const [N:0]u8</span>, donde N es la longitud de la cadena. Esto permite que los literales de cadena coerzan a trozos terminados en centinela y a muchos punteros terminados en centinela. Nota: los literales de cadena están codificados en UTF-8.
+
+<Prism lang="zig" code={`test "string literal" {
+    try expect(@TypeOf("hola") == *const [4:0]u8);
+}`}/>
+
+<span class="bg-gray-800 rounded-md px-2 text-purple-400">[:0]u8</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">[:0]const u8</span> modelan perfectamente las cadenas de C.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "C string" {
+    const c_string: [*:0]const u8 = "hello";
+    var array: [5]u8 = undefined;
+
+    var i: usize = 0;
+    while (c_string[i] != 0) : (i += 1) {
+        array[i] = c_string[i];
+    }
+}`}/>
+
+Los tipos terminados en sentinel se convierten a sus contrapartes no terminadas en sentinel.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "coercion" {
+    const a: [*:0]u8 = undefined;
+    const b: [*]u8 = a;
+
+    const c: [5:0]u8 = undefined;
+    const d: [5]u8 = c;
+
+    const e: [:0]f32 = undefined;
+    const f: []f32 = e;
+
+    _ = .{ b, d, f }; //uso ignorado
+}`}/>
+
+
+Se proporciona la segmentación terminada en sentinel que se puede utilizar para crear una segmentación terminada en sentinel con la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">x[n..m:t]</span>, donde t es el valor del terminador. Hacer esto es una afirmación por parte del programador de que la memoria está terminada donde debería estarlo; hacerlo incorrectamente es un comportamiento ilegal detectable.
+
+<Prism lang="zig" code={`test "sentinel terminated slicing" {
+    var x = [_:0]u8{255} ** 3;
+    const y = x[0..3 :0];
+    _ = y;
+}`}/>
+
+<EditThisPage url={sideMenuUrls[28].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[27].label} subText="Anterior" isRight={false} url={sideMenuUrls[27].url}/>
+    <NextButton text={sideMenuUrls[29].label} subText="Siguiente" isRight={true} url={sideMenuUrls[29].url}/>
+</div>
+</div>

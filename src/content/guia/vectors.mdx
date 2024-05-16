@@ -1,0 +1,73 @@
+---
+title: 'Vectors'
+description: 'Zig proporciona tipos de vectores para SIMD. Estos no deben ser confundidos con vectores en un sentido matemático, o vectores como los de std::vector en C++ (para esto, ver "Arraylist" en el capítulo 2). Los vectores pueden ser creados usando el built-in @Type que usamos anteriormente, y std.meta.Vector proporciona una forma abreviada para esto.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Vectors</h1>
+
+Zig proporciona tipos de vectores para SIMD. Estos no deben ser confundidos con vectores en un sentido matemático, o vectores como los de std::vector en C++ (para esto, ver "Arraylist" en el capítulo 2). Los vectores pueden ser creados usando el built-in <span class="bg-gray-800 rounded-md px-2 text-green-400">@Type</span> que usamos anteriormente, y <span class="bg-gray-800 rounded-md px-2 text-green-400">std.meta.Vector</span> proporciona una forma abreviada para esto.
+
+Los vectores solo pueden tener tipos secundarios de booleanos, enteros, flotantes y punteros.
+
+Las operaciones entre vectores con el mismo tipo secundario y longitud pueden llevarse a cabo. Estas operaciones se realizan en cada uno de los valores del vector. <span class="bg-gray-800 rounded-md px-2 text-green-400">std.meta.eql</span> se utiliza aquí para verificar la igualdad entre dos vectores (también útil para otros tipos como estructuras).
+
+
+<Prism lang="zig" code={`const meta = @import("std").meta;
+
+test "vector add" {
+    const x: @Vector(4, f32) = .{ 1, -10, 20, -1 };
+    const y: @Vector(4, f32) = .{ 2, 10, 0, 1 };
+    const z = x + y;
+    try expect(meta.eql(z, @Vector(4, f32){ 3, 0, 20, 0 }));
+}`}/>
+
+Los vectores son indexables.
+
+<Prism lang="zig" code={`test "vector indexing" {
+    const x: @Vector(4, u8) = .{ 255, 0, 255, 0 };
+    try expect(x[0] == 255);
+}`}/>
+
+La función integrada <span class="bg-gray-800 rounded-md px-2 text-green-400">@splat</span> se puede utilizar para construir un vector donde todos los valores son iguales. Aquí lo usamos para multiplicar un vector por un escalar.
+
+<Prism lang="zig" code={`test "vector * scalar" {
+    const x: @Vector(3, f32) = .{ 12.5, 37.5, 2.5 };
+    const y = x * @as(@Vector(3, f32), @splat(2));
+    try expect(meta.eql(y, @Vector(3, f32){ 25, 75, 5 }));
+}`}/>
+
+Los vectores no tienen un campo len como los arrays, pero aún así pueden ser recorridos con un bucle.
+
+<Prism lang="zig" code={`test "vector looping" {
+    const x = @Vector(4, u8){ 255, 0, 255, 0 };
+    const sum = blk: {
+        var tmp: u10 = 0;
+        var i: u8 = 0;
+        while (i < 4) : (i += 1) tmp += x[i];
+        break :blk tmp;
+    };
+    try expect(sum == 510);
+}`}/>
+
+
+Los vectores se convierten a sus arrays respectivos.
+
+<Prism lang="zig" code={`const arr: [4]f32 = @Vector(4, f32){ 1, 2, 3, 4 };`}/>
+
+Vale la pena señalar que usar vectores explícitos puede resultar en software más lento si no tomas las decisiones correctas: la auto-vectorización del compilador es bastante inteligente tal como está.
+
+<EditThisPage url={sideMenuUrls[29].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[28].label} subText="Anterior" isRight={false} url={sideMenuUrls[28].url}/>
+    <NextButton text={sideMenuUrls[30].label} subText="Siguiente" isRight={true} url={sideMenuUrls[30].url}/>
+</div>
+</div>
