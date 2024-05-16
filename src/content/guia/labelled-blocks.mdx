@@ -1,0 +1,43 @@
+---
+title: 'Labelled Blocks'
+description: 'Los Labelled Blocks de Zig son estrictamente compatibles con IEEE a menos que se use @setFloatMode(.Optimized), que es equivalente a -ffast-math de GCC. Los Labelled Blocks se coercen a tipos de float más grandes.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Labelled Blocks</h1>
+
+Los bloques en Zig son expresiones y pueden recibir etiquetas, que se utilizan para producir valores. Aquí, estamos usando una etiqueta llamada <span class="bg-gray-800 rounded-md px-2 text-green-400">"blk"</span>. Los bloques producen valores, lo que significa que se pueden utilizar en lugar de un valor. El valor de un bloque vacío <span class="bg-gray-800 rounded-md px-2 text-purple-400">\{}</span> es un valor del tipo <span class="bg-gray-800 rounded-md px-2 text-purple-400">void</span>.
+
+<Prism lang="zig" code={`test "labelled blocks" {
+    const count = blk: {
+        var sum: u32 = 0;
+        var i: u32 = 0;
+        while (i < 10) : (i += 1) sum += i;
+        break :blk sum;
+    };
+    try expect(count == 45);
+    try expect(@TypeOf(count) == u32);
+}`}/>
+
+Esto puede verse como equivalente a i++ en C.
+
+<Prism lang="zig" code={`blk: {
+    const tmp = i;
+    i += 1;
+    break :blk tmp;
+}`}/>
+
+<EditThisPage url={sideMenuUrls[19].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[18].label} subText="Anterior" isRight={false} url={sideMenuUrls[18].url}/>
+    <NextButton text={sideMenuUrls[20].label} subText="Siguiente" isRight={true} url={sideMenuUrls[20].url}/>
+</div>
+</div>
