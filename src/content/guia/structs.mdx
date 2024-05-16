@@ -1,0 +1,84 @@
+---
+title: 'Structs'
+description: 'Los Structs pueden pensarse como un par de [*]T (el puntero a los datos) y un usize (el conteo de elementos). Su sintaxis es []T, donde T es el tipo hijo. Los Structs se utilizan ampliamente en Zig cuando necesitas operar sobre cantidades arbitrarias de datos. Los Structs tienen los mismos atributos que los punteros, lo que significa que también existen Structs constantes. Los bucles for también operan sobre Structs. Las literales de cadena en Zig se convierten en []const u8.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Structs</h1>
+
+Las estructuras son el tipo de datos compuesto más común en Zig, lo que te permite definir tipos que pueden almacenar un conjunto fijo de campos nombrados. Zig no ofrece garantías sobre el orden en memoria de los campos en una estructura o su tamaño. Al igual que con los arrays, las estructuras también se construyen de forma ordenada con la sintaxis <span class="bg-gray-800 rounded-md px-2 text-purple-400">T\{}</span>. Aquí tienes un ejemplo de declaración y llenado de una estructura.
+
+<Prism lang="zig" code={`const Vec3 = struct { x: f32, y: f32, z: f32 };
+
+test "uso de la estructura" {
+    const my_vector = Vec3{
+        .x = 0,
+        .y = 100,
+        .z = 50,
+    };
+    _ = my_vector;
+}`}/>
+
+Los campos de las estructuras no pueden quedar implícitamente sin inicializar:
+
+<Prism lang="zig" code={`test "campo de estructura faltante" {
+    const my_vector = Vec3{
+        .x = 0,
+        .z = 50,
+    };
+    _ = my_vector;
+}`}/>
+
+<Prism lang="zig" code={`error: missing field: 'y'
+    const my_vector = Vec3{
+                        ^`}/>
+
+Los campos pueden tener valores predeterminados:
+
+<Prism lang="zig" code={`const Vec4 = struct { x: f32 = 0, y: f32 = 0, z: f32 = 0, w: f32 = 0 };
+
+test "valores predeterminados de estructura" {
+    const my_vector = Vec4{
+        .x = 25,
+        .y = -50,
+    };
+    _ = my_vector;
+}`}/>
+
+Al igual que las enums, las estructuras también pueden contener funciones y declaraciones.
+
+Las estructuras tienen la propiedad única de que cuando se les proporciona un puntero a una estructura, se realiza automáticamente un nivel de desreferenciación al acceder a los campos. Observa cómo, en este ejemplo, se accede a <span class="bg-gray-800 rounded-md px-2 text-purple-400">self.x</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">self.y</span> en la función swap sin necesidad de desreferenciar el puntero self.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+const Stuff = struct {
+    x: i32,
+    y: i32,
+    fn swap(self: *Stuff) void {
+        const tmp = self.x;
+        self.x = self.y;
+        self.y = tmp;
+    }
+};
+
+test "desreferenciación automática" {
+    var thing = Stuff{ .x = 10, .y = 20 };
+    thing.swap();
+    try expect(thing.x == 20);
+    try expect(thing.y == 10);
+}`}/>
+
+<EditThisPage url={sideMenuUrls[15].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[14].label} subText="Anterior" isRight={false} url={sideMenuUrls[14].url}/>
+    <NextButton text={sideMenuUrls[16].label} subText="Siguiente" isRight={true} url={sideMenuUrls[16].url}/>
+</div>
+</div>
