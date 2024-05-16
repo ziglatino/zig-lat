@@ -1,0 +1,47 @@
+---
+title: 'Expresiones If'
+description: 'Lorem ipsum dolor sit amet'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Expreciones If</h1>
+
+Las declaraciones <span class="bg-gray-800 rounded-md px-2 text-purple-400">"if"</span> de Zig aceptan valores booleanos (es decir, <span class="bg-gray-800 rounded-md px-2 text-purple-400">true</span> o <span class="bg-gray-800 rounded-md px-2 text-purple-400">false</span>). A diferencia de lenguajes como C o JavaScript, no hay valores que se conviertan implícitamente en valores booleanos.
+
+Aquí, introduciremos pruebas. Guarda el siguiente código, compílalo y ejecútalo con <span class="bg-gray-800 rounded-md px-2 text-purple-400">zig test main.zig</span>. Estaremos utilizando la función <span class="bg-gray-800 rounded-md px-2 text-green-400">expect</span> de la biblioteca estándar, la cual hará que la prueba falle si se le da el valor <span class="bg-gray-800 rounded-md px-2 text-purple-400">false</span>. Cuando una prueba falla, se mostrará el error y stack trace.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "if statement" {
+    const a = true;
+    var x: u16 = 0;
+    if (a) {
+        x += 1;
+    } else {
+        x += 2;
+    }
+    try expect(x == 1);
+}`}/>
+
+Las declaraciones <span class="bg-gray-800 rounded-md px-2 text-purple-400">"if"</span> también funcionan como expresiones.
+<Prism lang="zig" code={`test "if statement expression" {
+    const a = true;
+    var x: u16 = 0;
+    x += if (a) 1 else 2;
+    try expect(x == 1);
+}`}/>
+
+<EditThisPage  url={sideMenuUrls[2].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={sideMenuUrls[1].label} subText="Anterior" isRight={false} url={sideMenuUrls[1].url}/>
+    <NextButton text={sideMenuUrls[3].label} subText="Siguiente" isRight={true} url={sideMenuUrls[3].url}/>
+</div>
+</div>
