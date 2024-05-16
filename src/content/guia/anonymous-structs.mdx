@@ -1,0 +1,81 @@
+---
+title: 'Anonymous Structs'
+description: 'El tipo struct puede omitirse en un literal struct. Estos literales pueden coercer a otros tipos struct.'
+pubDate: '5/15/2024'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls } from "../../constants/sideMenu.ts";
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Anonymous Structs</h1>
+
+El tipo struct puede omitirse en un literal struct. Estos literales pueden coercer a otros tipos struct.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "struct anonima literal" {
+    const Point = struct { x: i32, y: i32 };
+
+    const pt: Point = .{
+        .x = 13,
+        .y = 67,
+    };
+    try expect(pt.x == 13);
+    try expect(pt.y == 67);
+}`}/>
+
+Las estructuras anónimas pueden ser completamente anónimas, es decir, sin ser convertidas a otro tipo de estructura.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "estructura completamente anónima" {
+    try dump(.{
+        .int = @as(u32, 1234),
+        .float = @as(f64, 12.34),
+        .b = true,
+        .s = "hi",
+    });
+}
+
+fn dump(args: anytype) !void {
+    try expect(args.int == 1234);
+    try expect(args.float == 12.34);
+    try expect(args.b);
+    try expect(args.s[0] == 'h');
+    try expect(args.s[1] == 'i');
+}`}/>
+
+Las estructuras anónimas sin nombres de campos pueden ser creadas y se denominan tuplas. Estas tienen muchas de las propiedades de los arrays; las tuplas pueden ser iteradas, indexadas, pueden ser utilizadas con los operadores <span class="bg-gray-800 rounded-md px-2 text-purple-400">++</span> y <span class="bg-gray-800 rounded-md px-2 text-purple-400">**</span>, y tienen un campo len. Internamente, estas tienen nombres de campos numerados comenzando en <span class="bg-gray-800 rounded-md px-2 text-purple-400">"0"</span>, los cuales pueden ser accedidos con la sintaxis especial <span class="bg-gray-800 rounded-md px-2 text-purple-400">@"0"</span>, que actúa como un escape para la sintaxis - las cosas dentro de <span class="bg-gray-800 rounded-md px-2 text-purple-400">@""</span> siempre se reconocen como identificadores.
+
+Aquí se debe utilizar un bucle en línea para iterar sobre la tupla, ya que el tipo de cada campo de la tupla puede ser diferente.
+
+<Prism lang="zig" code={`const expect = @import("std").testing.expect;
+
+test "tuple" {
+    const values = .{
+        @as(u32, 1234),
+        @as(f64, 12.34),
+        true,
+        "hi",
+    } ++ .{false} ** 2;
+    try expect(values[0] == 1234);
+    try expect(values[4] == false);
+    inline for (values, 0..) |v, i| {
+        if (i != 2) continue;
+        try expect(v);
+    }
+    try expect(values.len == 6);
+    try expect(values.@"3"[0] == 'h');
+}`}/>
+
+<EditThisPage url={sideMenuUrls[27].url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8 place-content-center">
+    <NextButton text={sideMenuUrls[26].label} subText="Anterior" isRight={false} url={sideMenuUrls[26].url}/>
+    <NextButton text={sideMenuUrls[28].label} subText="Siguiente" isRight={true} url={sideMenuUrls[28].url}/>
+</div>
+</div>
