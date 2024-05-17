@@ -194,6 +194,13 @@ declare module 'astro:content' {
 } & { render(): Render[".mdx"] };
 };
 "guia": {
+"Instalacion.mdx": {
+	id: "Instalacion.mdx";
+  slug: "instalacion";
+  body: string;
+  collection: "guia";
+  data: any
+} & { render(): Render[".mdx"] };
 "anonymous-structs.mdx": {
 	id: "anonymous-structs.mdx";
   slug: "anonymous-structs";
