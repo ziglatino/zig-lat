@@ -6,7 +6,9 @@ heroImage: '/blog-placeholder-3.jpg'
 ---
 
 import { Prism } from "@astrojs/prism";
-
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls, Instalacion, HolaMundo } from "../../constants/sideMenu.ts";
 
 <div class="flex flex-col gap-y-5 text-white">
 
@@ -32,4 +34,14 @@ Utiliza <span class="bg-gray-800 rounded-md px-2 text-purple-400">zig run main.z
     <p class="text-white text-[14px]">Asegúrate de que tu archivo main.zig esté codificado en UTF-8, ya que el compilador de Zig actualmente no admite otros tipos de codificación. Para volver a codificar tu archivo como UTF-8, ejecuta zig fmt main.zig y vuelve a abrir el archivo en tu editor.</p>
   </div>
 </section>
+
+<EditThisPage  url={HolaMundo.url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text={Instalacion.label} subText="Anterior" isRight={false} url={Instalacion.url}/>
+    <NextButton text={sideMenuUrls[0].label} subText="Siguiente" isRight={true} url={sideMenuUrls[0].url}/>
 </div>
+</div>
+
+
+
