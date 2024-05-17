@@ -1,0 +1,29 @@
+---
+title: 'Instalacion'
+description: 'Instalando Zig'
+pubDate: 'Jul 08 2022'
+heroImage: '/blog-placeholder-3.jpg'
+---
+
+import { Prism } from "@astrojs/prism";
+import NextButton from "../../components/Guia/NextButton.svelte";
+import EditThisPage from "../../components/Guia/EditThisPage.svelte";
+import { Lenguaje as sideMenuUrls, Instalacion, HolaMundo } from "../../constants/sideMenu.ts";
+
+
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Instalacion</h1>
+
+La <a class="bg-gray-800 rounded-md px-2 text-purple-400 hover:text-purple-300" href="https://ziglang.org/download/" target="_blank">Pagina descargas de Zig</a> incluye binarios precompilados para plataformas comunes. En esta página encontrarás binarios para la última versión de desarrollo, así como para las versiones principales. La última versión, que esta guía sigue, se puede encontrar en la parte superior de la página.
+
+Para mi computadora, descargaré zig-macos-aarch64-0.12.0-dev.2777+2176a73d6.tar.xz. Es posible que estés en una plataforma diferente o en una versión más reciente. Después de extraer el archivo, deberías tener un binario de zig (además de otras cosas) que querrás enlazar o agregar a tu PATH; o cualquier flujo con el que estés acostumbrado.
+
+Ahora deberías poder ejecutar zig zen y zig version para probar tu configuración.
+
+<EditThisPage  url={Instalacion.url} date="5/15/2024" editor={"Vital"} />
+
+<div class="flex w-full justify-between space-x-8">
+    <NextButton text="Inicio" subText="Anterior" isRight={false} url="/guia"/>
+    <NextButton text={HolaMundo.label} subText="Siguiente" isRight={true} url={HolaMundo.url}/>
+</div>
+</div>
