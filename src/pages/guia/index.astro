@@ -18,10 +18,10 @@ import Sidebar from "../../components/Sidebar.svelte";
     <Header />
     <div class="flex bg-[#1b1b1d]">
       <Sidebar client:visible />
-      <main class="w-full  text-white">
-        <div class="container mx-auto w-[800px] gap-y-4">
-          <section class="text-justify mt-8">
-            <h2 class="text-white">Bienvenido</h2>
+      <main class="w-full text-white px-4">
+        <div class="container mx-auto w-full md:w-[800px] gap-y-5 py-8">
+          <section class="text-justify ">
+            <h1 class="text-white py-8">Bienvenido</h1>
             <p>
               <a
                 href="https://ziglang.org/"
@@ -32,20 +32,17 @@ import Sidebar from "../../components/Sidebar.svelte";
               para mantener software robusto, óptimo y reutilizable.
             </p>
           </section>
-          <section class="text-justify">
-            <div
-              class="rounded-lg bg-[#4d3800] flex flex-col gap-y-2 px-4 py-2 border-0 border-l-8 border-[#e6a700]"
-            >
-              <div class="flex place-items-center">
-                <img class="h-14" src="warn.svg" alt="" />
-                <h2 class="text-white text-2xl">Peligro</h2>
-              </div>
-              <p class="text-white">
-                La última versión de Zig es la 0.12.0 y actualmente es
-                inestable.
-              </p>
+          <div
+            class="rounded-lg bg-[#4d3800] gap-y-2 px-4 py-2 border-0 border-l-8 border-[#e6a700]"
+          >
+            <div class="flex place-items-center">
+              <img class="h-14" src="warn.svg" alt="" />
+              <h2 class="text-white text-2xl">Peligro</h2>
             </div>
-          </section>
+            <p class="text-white text-justify">
+              La última versión de Zig es la 0.12.0 y actualmente es inestable.
+            </p>
+          </div>
 
           <section class="text-justify">
             <p>Para seguir esta guía, asumimos que tienes:</p>

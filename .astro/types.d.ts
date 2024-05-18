@@ -194,13 +194,6 @@ declare module 'astro:content' {
 } & { render(): Render[".mdx"] };
 };
 "guia": {
-"Instalacion.mdx": {
-	id: "Instalacion.mdx";
-  slug: "instalacion";
-  body: string;
-  collection: "guia";
-  data: any
-} & { render(): Render[".mdx"] };
 "anonymous-structs.mdx": {
 	id: "anonymous-structs.mdx";
   slug: "anonymous-structs";
@@ -295,6 +288,13 @@ declare module 'astro:content' {
 "inline-loops.mdx": {
 	id: "inline-loops.mdx";
   slug: "inline-loops";
+  body: string;
+  collection: "guia";
+  data: any
+} & { render(): Render[".mdx"] };
+"instalacion.mdx": {
+	id: "instalacion.mdx";
+  slug: "instalacion";
   body: string;
   collection: "guia";
   data: any

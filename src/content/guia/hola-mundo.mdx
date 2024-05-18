@@ -10,9 +10,8 @@ import NextButton from "../../components/Guia/NextButton.svelte";
 import EditThisPage from "../../components/Guia/EditThisPage.svelte";
 import { Lenguaje as sideMenuUrls, Instalacion, HolaMundo } from "../../constants/sideMenu.ts";
 
-<div class="flex flex-col gap-y-5 text-white">
-
-  <h1 class="text-white py-8">Hola Mundo</h1>
+<div class="flex flex-col gap-y-5 text-white py-8">
+<h1 class="text-white py-8">Hola Mundo</h1>
 
   Crea un archivo llamado  <span class="bg-gray-800 rounded-md px-2 text-purple-400">main.zig</span>, con el siguiente contenido:
   <Prism lang="zig" code={`const std = @import("std");

@@ -22,8 +22,8 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
     <Header />
     <div class="flex bg-[#1b1b1d]">
       <Sidebar client:visible />
-      <main class="w-full">
-        <div class="container w-[800px] mx-auto">
+      <main class="w-full px-4">
+        <div class="container w-full md:w-[800px] mx-auto">
           <slot />
         </div>
       </main>
