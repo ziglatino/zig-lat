@@ -17,7 +17,7 @@
 </script>
 
 <div
-  class="sidebar sticky h-screen bottom-0 lg:left-0 top-0 p-2 w-[300px] overflow-y-auto text-center bg-[#1b1b1d] border-r-[0.1px] border-gray-500"
+  class="sidebar sticky h-screen bottom-0 lg:left-0 top-0 p-2 w-[300px] overflow-y-auto text-center bg-[#1b1b1d] border-r-[0.1px] border-gray-500 hidden md:block"
 >
   <!-- <div class="text-gray-100 text-xl">
     <div class="p-2.5 mt-1 flex items-center">

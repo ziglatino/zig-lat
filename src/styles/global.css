@@ -30,7 +30,7 @@
 	font-display: swap;
 }
 body {
-	font-family: 'Atkinson', sans-serif;
+	/* font-family: 'Atkinson', sans-serif;
 	margin: 0;
 	padding: 0;
 	text-align: left;
@@ -40,11 +40,11 @@ body {
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	background: rgb(17 24 39 / var(--tw-bg-opacity));
-	line-height: 1.7;
+	line-height: 1.7; */
 }
 main {
-	width: 860px;
-	max-width: calc(100% - 2em);
+	/* width: 860px; */
+	/* max-width: calc(100% - 2em); */
 	/* margin: auto; */
 	/* padding: 3em 1em; */
 }
@@ -105,7 +105,7 @@ img {
 	border-radius: 8px;
 }
 code {
-	padding: 2px 5px;
+	/* padding: 2px 5px; */
 	background-color: rgb(var(--gray-light));
 	border-radius: 2px;
 }
@@ -118,7 +118,6 @@ pre > code {
 }
 blockquote {
 	border-left: 4px solid var(--accent);
-	padding: 0 0 0 20px;
 	margin: 0px;
 	font-size: 1.333em;
 }
@@ -131,7 +130,6 @@ hr {
 		font-size: 18px;
 	}
 	main {
-		padding: 1em;
 	}
 }
 
