@@ -67,9 +67,9 @@
   <div class="my-4 bg-gray-600 h-[1px]"></div>
 
   <DropMenu buttonText="Lenguaje" items={Lenguaje} />
-  <DropMenu buttonText="Libreria Estandar" {items} />
-  <DropMenu buttonText="Sistema de construcción" {items} />
-  <DropMenu buttonText="Trabajando con C" {items} />
-  <DropMenu buttonText="Asincronia" {items} />
+  <!-- <DropMenu buttonText="Libreria Estandar" {items} /> -->
+  <!-- <DropMenu buttonText="Sistema de construcción" {items} /> -->
+  <!-- <DropMenu buttonText="Trabajando con C" {items} /> -->
+  <!-- <DropMenu buttonText="Asincronia" {items} /> -->
 
 </div>
